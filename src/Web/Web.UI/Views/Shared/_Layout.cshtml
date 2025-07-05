@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - فروشگاه آنلاین</title>
+    
+    <!-- Bootstrap RTL CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    
+    <!-- Persian Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Vazir:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    
+    <style>
+        body {
+            font-family: 'Vazir', sans-serif;
+            direction: rtl;
+            text-align: right;
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+        
+        .product-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .price {
+            font-weight: 600;
+            color: #28a745;
+        }
+        
+        .original-price {
+            text-decoration: line-through;
+            color: #6c757d;
+        }
+        
+        .badge-sale {
+            background-color: #dc3545;
+            color: white;
+            font-size: 0.8rem;
+        }
+        
+        .cart-count {
+            background-color: #dc3545;
+            color: white;
+            border-radius: 50%;
+            font-size: 0.75rem;
+            padding: 2px 6px;
+            margin-right: 5px;
+        }
+        
+        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 80px 0;
+        }
+        
+        .category-card {
+            border: none;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .category-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        .footer {
+            background-color: #343a40;
+            color: white;
+            padding: 40px 0;
+        }
+        
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        
+        .btn-success {
+            background-color: #28a745;
+            border-color: #28a745;
+        }
+        
+        .alert {
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="@Url.Action("Index", "Home")">
+                    <i class="fas fa-shopping-cart me-2"></i>
+                    فروشگاه آنلاین
+                </a>
+                
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="@Url.Action("Index", "Home")">خانه</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="@Url.Action("Index", "Product")">محصولات</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="@Url.Action("Featured", "Product")">محصولات ویژه</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="@Url.Action("OnSale", "Product")">تخفیف‌ها</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="@Url.Action("About", "Home")">درباره ما</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="@Url.Action("Contact", "Home")">تماس با ما</a>
+                        </li>
+                    </ul>
+                    
+                    <ul class="navbar-nav">
+                        <!-- Search Form -->
+                        <li class="nav-item">
+                            <form class="d-flex me-3" method="get" action="@Url.Action("Search", "Product")">
+                                <input class="form-control" type="search" name="term" placeholder="جستجو..." aria-label="Search">
+                                <button class="btn btn-outline-light" type="submit">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </form>
+                        </li>
+                        
+                        <!-- Cart -->
+                        <li class="nav-item">
+                            <a class="nav-link" href="@Url.Action("Index", "Cart")">
+                                <i class="fas fa-shopping-cart"></i>
+                                سبد خرید
+                                <span class="cart-count" id="cart-count">0</span>
+                            </a>
+                        </li>
+                        
+                        <!-- User Account -->
+                        @if (Context.Session.GetString("AuthToken") != null)
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-user"></i>
+                                    حساب کاربری
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" href="@Url.Action("Profile", "Account")">پروفایل</a></li>
+                                    <li><a class="dropdown-item" href="@Url.Action("Orders", "Account")">سفارشات</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <form method="post" action="@Url.Action("Logout", "Account")">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="dropdown-item">خروج</button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" href="@Url.Action("Login", "Account")">
+                                    <i class="fas fa-sign-in-alt"></i>
+                                    ورود
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="@Url.Action("Register", "Account")">
+                                    <i class="fas fa-user-plus"></i>
+                                    ثبت نام
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    
+    <main role="main" class="pb-3">
+        <!-- Alert Messages -->
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                @TempData["Success"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+        
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                @TempData["Error"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+        
+        @RenderBody()
+    </main>
+    
+    <footer class="footer mt-auto">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5>فروشگاه آنلاین</h5>
+                    <p>بهترین محصولات با کیفیت‌ترین خدمات</p>
+                    <div class="social-links">
+                        <a href="#" class="text-light me-3"><i class="fab fa-telegram"></i></a>
+                        <a href="#" class="text-light me-3"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-light me-3"><i class="fab fa-twitter"></i></a>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <h6>لینک‌های مفید</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="@Url.Action("Index", "Home")" class="text-light">خانه</a></li>
+                        <li><a href="@Url.Action("Index", "Product")" class="text-light">محصولات</a></li>
+                        <li><a href="@Url.Action("About", "Home")" class="text-light">درباره ما</a></li>
+                        <li><a href="@Url.Action("Contact", "Home")" class="text-light">تماس با ما</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-2">
+                    <h6>خدمات مشتریان</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="#" class="text-light">راهنمای خرید</a></li>
+                        <li><a href="#" class="text-light">شرایط و قوانین</a></li>
+                        <li><a href="@Url.Action("Privacy", "Home")" class="text-light">حریم خصوصی</a></li>
+                        <li><a href="#" class="text-light">پشتیبانی</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h6>اطلاعات تماس</h6>
+                    <p><i class="fas fa-phone me-2"></i>021-12345678</p>
+                    <p><i class="fas fa-envelope me-2"></i>info@eshop.com</p>
+                    <p><i class="fas fa-map-marker-alt me-2"></i>تهران، ایران</p>
+                </div>
+            </div>
+            <hr class="my-4">
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    <p>&copy; 2024 فروشگاه آنلاین. تمام حقوق محفوظ است.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Custom Scripts -->
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    
+    <script>
+        // Update cart count
+        function updateCartCount() {
+            fetch('@Url.Action("GetCartCount", "Cart")')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('cart-count').textContent = data.count;
+                })
+                .catch(error => console.error('Error updating cart count:', error));
+        }
+        
+        // Update cart count on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCartCount();
+        });
+        
+        // Persian number formatting
+        function formatPersianNumber(num) {
+            const persianDigits = '۰۱۲۳۴۵۶۷۸۹';
+            return num.toString().replace(/\d/g, function(digit) {
+                return persianDigits[digit];
+            });
+        }
+        
+        // Format prices with Persian numbers
+        document.addEventListener('DOMContentLoaded', function() {
+            const prices = document.querySelectorAll('.price, .original-price');
+            prices.forEach(price => {
+                const text = price.textContent;
+                const formattedText = text.replace(/\d+/g, function(match) {
+                    return formatPersianNumber(parseInt(match).toLocaleString('fa-IR'));
+                });
+                price.textContent = formattedText;
+            });
+        });
+    </script>
+    
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
