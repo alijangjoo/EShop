@@ -1,10 +1,12 @@
+using Admin.UI.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
 // HttpClient for API calls
-builder.Services.AddHttpClient();
+builder.Services.AddHttpClient<IAdminApiService, AdminApiService>();
 
 // Session support
 builder.Services.AddSession(options =>
@@ -14,6 +16,12 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
+// Add HttpContextAccessor for admin API service
+builder.Services.AddHttpContextAccessor();
+
+// Register custom services
+builder.Services.AddScoped<IAdminApiService, AdminApiService>();
+
 // Authentication
 builder.Services.AddAuthentication("Bearer")
     .AddJwtBearer("Bearer", options =>
@@ -21,14 +29,28 @@ builder.Services.AddAuthentication("Bearer")
         options.Authority = builder.Configuration["IdentityServer:Authority"];
         options.RequireHttpsMetadata = false;
         options.Audience = "admin";
+        options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+        {
+            ValidateAudience = false
+        };
     });
+
+// Authorization
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy =>
+    {
+        policy.RequireAuthenticatedUser();
+        policy.RequireClaim("role", "admin");
+    });
+});
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Home/Error");
+    app.UseExceptionHandler("/Dashboard/Error");
     app.UseHsts();
 }
 
