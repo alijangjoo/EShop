@@ -1,0 +1,196 @@
+version: '3.8'
+
+services:
+  # SQL Server
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: eshop-sqlserver
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=YourStrong@Passw0rd
+      - MSSQL_PID=Express
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    networks:
+      - eshop-network
+
+  # RabbitMQ
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: eshop-rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - eshop-network
+
+  # Identity API
+  identity-api:
+    build:
+      context: .
+      dockerfile: src/Services/Identity/Identity.API/Dockerfile
+    container_name: eshop-identity-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=EShopIdentityDb;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=true;
+      - JwtSettings__Key=YourSuperSecretKeyThatShouldBeAtLeast32CharactersLong
+      - JwtSettings__Issuer=EShopIdentityAPI
+      - JwtSettings__Audience=EShopApp
+    ports:
+      - "5001:80"
+    depends_on:
+      - sqlserver
+    networks:
+      - eshop-network
+
+  # Product API
+  product-api:
+    build:
+      context: .
+      dockerfile: src/Services/Product/Product.API/Dockerfile
+    container_name: eshop-product-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=EShopProductDb;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=true;
+      - JwtSettings__Key=YourSuperSecretKeyThatShouldBeAtLeast32CharactersLong
+      - JwtSettings__Issuer=EShopIdentityAPI
+      - JwtSettings__Audience=EShopApp
+    ports:
+      - "5002:80"
+    depends_on:
+      - sqlserver
+    networks:
+      - eshop-network
+
+  # Order API
+  order-api:
+    build:
+      context: .
+      dockerfile: src/Services/Order/Order.API/Dockerfile
+    container_name: eshop-order-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=EShopOrderDb;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=true;
+      - JwtSettings__Key=YourSuperSecretKeyThatShouldBeAtLeast32CharactersLong
+      - JwtSettings__Issuer=EShopIdentityAPI
+      - JwtSettings__Audience=EShopApp
+      - EventBusSettings__HostAddress=amqp://guest:guest@rabbitmq:5672
+    ports:
+      - "5003:80"
+    depends_on:
+      - sqlserver
+      - rabbitmq
+    networks:
+      - eshop-network
+
+  # Payment API
+  payment-api:
+    build:
+      context: .
+      dockerfile: src/Services/Payment/Payment.API/Dockerfile
+    container_name: eshop-payment-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=EShopPaymentDb;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=true;
+      - JwtSettings__Key=YourSuperSecretKeyThatShouldBeAtLeast32CharactersLong
+      - JwtSettings__Issuer=EShopIdentityAPI
+      - JwtSettings__Audience=EShopApp
+      - EventBusSettings__HostAddress=amqp://guest:guest@rabbitmq:5672
+    ports:
+      - "5004:80"
+    depends_on:
+      - sqlserver
+      - rabbitmq
+    networks:
+      - eshop-network
+
+  # Notification API
+  notification-api:
+    build:
+      context: .
+      dockerfile: src/Services/Notification/Notification.API/Dockerfile
+    container_name: eshop-notification-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+      - EventBusSettings__HostAddress=amqp://guest:guest@rabbitmq:5672
+    ports:
+      - "5005:80"
+    depends_on:
+      - rabbitmq
+    networks:
+      - eshop-network
+
+  # API Gateway
+  api-gateway:
+    build:
+      context: .
+      dockerfile: src/ApiGateways/ApiGateway/Dockerfile
+    container_name: eshop-api-gateway
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+    ports:
+      - "5000:80"
+    depends_on:
+      - identity-api
+      - product-api
+      - order-api
+      - payment-api
+      - notification-api
+    networks:
+      - eshop-network
+
+  # Web UI
+  web-ui:
+    build:
+      context: .
+      dockerfile: src/Web/Web.UI/Dockerfile
+    container_name: eshop-web-ui
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+      - ApiSettings__GatewayAddress=http://api-gateway
+    ports:
+      - "5100:80"
+    depends_on:
+      - api-gateway
+    networks:
+      - eshop-network
+
+  # Admin UI
+  admin-ui:
+    build:
+      context: .
+      dockerfile: src/Web/Admin.UI/Dockerfile
+    container_name: eshop-admin-ui
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+      - ApiSettings__GatewayAddress=http://api-gateway
+      - IdentityServer__Authority=http://identity-api
+    ports:
+      - "5200:80"
+    depends_on:
+      - api-gateway
+    networks:
+      - eshop-network
+
+volumes:
+  sqlserver_data:
+  rabbitmq_data:
+
+networks:
+  eshop-network:
+    driver: bridge

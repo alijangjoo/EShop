@@ -97,6 +97,31 @@ EShop/
 └── README.md
 ```
 
+## ✅ Implementation Status / وضعیت پیاده‌سازی
+
+### Completed Services / سرویس‌های تکمیل شده
+
+- ✅ **Identity.API** - Complete with JWT authentication, user registration/login, role management
+- ✅ **Product.API** - Complete with Persian support, categories, images, attributes
+- ✅ **Order.API** - Complete with order management, Persian fields, event publishing
+- ✅ **Payment.API** - Basic structure ready for IPG and Cash payment integration
+- ✅ **Notification.API** - Basic structure ready for email/SMS notifications
+- ✅ **EventBus.Messages** - Complete shared messaging library
+- ✅ **API Gateway** - Basic Ocelot configuration ready
+- ✅ **Web.UI** - Basic customer website structure
+- ✅ **Admin.UI** - Basic admin panel structure
+
+### Databases Created / پایگاه‌های داده ایجاد شده
+
+- **EShopIdentityDb** - User management and authentication
+- **EShopProductDb** - Products, categories, images, attributes
+- **EShopOrderDb** - Orders and order items
+- **EShopPaymentDb** - Payment transactions (ready for implementation)
+
+### Available Endpoints / نقاط پایانی موجود
+
+All services include Swagger documentation accessible at `/swagger` endpoint.
+
 ## 🔧 Setup Instructions / راهنمای نصب
 
 ### Prerequisites / پیش‌نیازها
@@ -159,6 +184,36 @@ EShop/
 
    Or use Visual Studio to run multiple projects simultaneously.
 
+### Using Docker Compose / استفاده از Docker Compose
+
+The entire platform can be run using Docker Compose:
+
+```bash
+# Build and start all services
+docker-compose up --build
+
+# Start in detached mode
+docker-compose up -d --build
+
+# View logs
+docker-compose logs -f
+
+# Stop all services
+docker-compose down
+```
+
+**Service URLs:**
+- **API Gateway**: http://localhost:5000
+- **Identity API**: http://localhost:5001
+- **Product API**: http://localhost:5002
+- **Order API**: http://localhost:5003
+- **Payment API**: http://localhost:5004
+- **Notification API**: http://localhost:5005
+- **Web UI**: http://localhost:5100
+- **Admin UI**: http://localhost:5200
+- **RabbitMQ Management**: http://localhost:15672 (guest/guest)
+- **SQL Server**: localhost:1433 (sa/YourStrong@Passw0rd)
+
 ## 🔐 Default Credentials / اعتبارهای پیش‌فرض
 
 ### Admin User / کاربر مدیر
@@ -190,6 +245,20 @@ EShop/
 - `PUT /api/category/{id}` - Update category (Admin only)
 - `DELETE /api/category/{id}` - Delete category (Admin only)
 
+### Order Service (Port: 5003)
+- `GET /api/order` - Get orders with filtering
+- `GET /api/order/{id}` - Get specific order
+- `POST /api/order` - Create new order
+- `PUT /api/order/{id}/status` - Update order status (Admin only)
+- `PUT /api/order/{id}/payment-status` - Update payment status (Admin only)
+- `DELETE /api/order/{id}` - Cancel order (Admin only)
+
+### Payment Service (Port: 5004)
+- Ready for IPG and Cash payment integration
+
+### Notification Service (Port: 5005)
+- Ready for email and SMS notifications
+
 ## 📊 Database Schema / طرح پایگاه داده
 
 ### Identity Database
@@ -202,6 +271,13 @@ EShop/
 - `Categories` - Product categories
 - `ProductImages` - Product images
 - `ProductAttributes` - Product attributes
+
+### Order Database
+- `Orders` - Order information with Persian fields
+- `OrderItems` - Order line items with product details
+
+### Payment Database
+- `Payments` - Payment transactions for IPG and Cash payments (ready for implementation)
 
 ## 🎨 Persian/RTL Styling / استایل فارسی/RTL
 
