@@ -1,0 +1,409 @@
+@model Admin.UI.Models.PaymentViewModel
+@{
+    ViewData["Title"] = $"جزئیات پرداخت / Payment Details - {Model.PaymentNumber}";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0">@ViewData["Title"]</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="@Url.Action("Index", "Dashboard")">داشبورد</a></li>
+                        <li class="breadcrumb-item"><a href="@Url.Action("Payments", "Dashboard")">پرداخت‌ها</a></li>
+                        <li class="breadcrumb-item active">جزئیات پرداخت</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-8">
+                    <!-- Payment Information -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">اطلاعات پرداخت / Payment Information</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <table class="table table-borderless">
+                                        <tr>
+                                            <th width="40%">شماره پرداخت:</th>
+                                            <td>@Model.PaymentNumber</td>
+                                        </tr>
+                                        <tr>
+                                            <th>شماره سفارش:</th>
+                                            <td>@Model.OrderId</td>
+                                        </tr>
+                                        <tr>
+                                            <th>کاربر:</th>
+                                            <td>@Model.UserName</td>
+                                        </tr>
+                                        <tr>
+                                            <th>مبلغ:</th>
+                                            <td><strong>@Model.Amount.ToString("N0") تومان</strong></td>
+                                        </tr>
+                                        <tr>
+                                            <th>روش پرداخت:</th>
+                                            <td>
+                                                @switch (Model.PaymentMethod)
+                                                {
+                                                    case PaymentMethod.IPG:
+                                                        <span class="badge badge-primary">درگاه پرداخت</span>
+                                                        break;
+                                                    case PaymentMethod.Cash:
+                                                        <span class="badge badge-secondary">پرداخت نقدی</span>
+                                                        break;
+                                                }
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>وضعیت:</th>
+                                            <td>
+                                                @switch (Model.Status)
+                                                {
+                                                    case PaymentStatus.Pending:
+                                                        <span class="badge badge-warning">در انتظار</span>
+                                                        break;
+                                                    case PaymentStatus.Processing:
+                                                        <span class="badge badge-info">در حال پردازش</span>
+                                                        break;
+                                                    case PaymentStatus.Completed:
+                                                        <span class="badge badge-success">تکمیل شده</span>
+                                                        break;
+                                                    case PaymentStatus.Failed:
+                                                        <span class="badge badge-danger">ناموفق</span>
+                                                        break;
+                                                    case PaymentStatus.Cancelled:
+                                                        <span class="badge badge-secondary">لغو شده</span>
+                                                        break;
+                                                    case PaymentStatus.Refunded:
+                                                        <span class="badge badge-dark">بازگشت داده شده</span>
+                                                        break;
+                                                }
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div class="col-md-6">
+                                    <table class="table table-borderless">
+                                        <tr>
+                                            <th width="40%">تاریخ پرداخت:</th>
+                                            <td>@Model.PaymentDate.ToString("yyyy/MM/dd HH:mm")</td>
+                                        </tr>
+                                        @if (Model.ProcessedDate.HasValue)
+                                        {
+                                            <tr>
+                                                <th>تاریخ پردازش:</th>
+                                                <td>@Model.ProcessedDate.Value.ToString("yyyy/MM/dd HH:mm")</td>
+                                            </tr>
+                                        }
+                                        @if (Model.CompletedDate.HasValue)
+                                        {
+                                            <tr>
+                                                <th>تاریخ تکمیل:</th>
+                                                <td>@Model.CompletedDate.Value.ToString("yyyy/MM/dd HH:mm")</td>
+                                            </tr>
+                                        }
+                                        <tr>
+                                            <th>تاریخ ایجاد:</th>
+                                            <td>@Model.CreatedAt.ToString("yyyy/MM/dd HH:mm")</td>
+                                        </tr>
+                                        <tr>
+                                            <th>آخرین بروزرسانی:</th>
+                                            <td>@Model.UpdatedAt.ToString("yyyy/MM/dd HH:mm")</td>
+                                        </tr>
+                                        <tr>
+                                            <th>ایجاد کننده:</th>
+                                            <td>@Model.CreatedBy</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Customer Information -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">اطلاعات مشتری / Customer Information</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <table class="table table-borderless">
+                                        <tr>
+                                            <th width="40%">نام:</th>
+                                            <td>@Model.CustomerName</td>
+                                        </tr>
+                                        <tr>
+                                            <th>ایمیل:</th>
+                                            <td>@Model.CustomerEmail</td>
+                                        </tr>
+                                        <tr>
+                                            <th>تلفن:</th>
+                                            <td>@Model.CustomerPhone</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment Details -->
+                    @if (Model.PaymentMethod == PaymentMethod.IPG)
+                    {
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">جزئیات درگاه پرداخت / Gateway Details</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <table class="table table-borderless">
+                                            @if (!string.IsNullOrEmpty(Model.CardName))
+                                            {
+                                                <tr>
+                                                    <th width="40%">نام کارت:</th>
+                                                    <td>@Model.CardName</td>
+                                                </tr>
+                                            }
+                                            @if (!string.IsNullOrEmpty(Model.CardLastFourDigits))
+                                            {
+                                                <tr>
+                                                    <th>آخرین ۴ رقم کارت:</th>
+                                                    <td>**** **** **** @Model.CardLastFourDigits</td>
+                                                </tr>
+                                            }
+                                            @if (!string.IsNullOrEmpty(Model.TransactionId))
+                                            {
+                                                <tr>
+                                                    <th>شناسه تراکنش:</th>
+                                                    <td>@Model.TransactionId</td>
+                                                </tr>
+                                            }
+                                        </table>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <table class="table table-borderless">
+                                            @if (!string.IsNullOrEmpty(Model.ReferenceNumber))
+                                            {
+                                                <tr>
+                                                    <th width="40%">شماره مرجع:</th>
+                                                    <td>@Model.ReferenceNumber</td>
+                                                </tr>
+                                            }
+                                            @if (!string.IsNullOrEmpty(Model.GatewayTransactionId))
+                                            {
+                                                <tr>
+                                                    <th>شناسه تراکنش درگاه:</th>
+                                                    <td>@Model.GatewayTransactionId</td>
+                                                </tr>
+                                            }
+                                            @if (!string.IsNullOrEmpty(Model.BankNamePersian))
+                                            {
+                                                <tr>
+                                                    <th>بانک:</th>
+                                                    <td>@Model.BankNamePersian</td>
+                                                </tr>
+                                            }
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Notes and Description -->
+                    @if (!string.IsNullOrEmpty(Model.Description) || !string.IsNullOrEmpty(Model.Notes) || !string.IsNullOrEmpty(Model.FailureReason))
+                    {
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">یادداشت‌ها و توضیحات / Notes & Description</h3>
+                            </div>
+                            <div class="card-body">
+                                @if (!string.IsNullOrEmpty(Model.Description))
+                                {
+                                    <div class="mb-3">
+                                        <h6>توضیحات:</h6>
+                                        <p>@Model.Description</p>
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(Model.DescriptionPersian))
+                                {
+                                    <div class="mb-3">
+                                        <h6>توضیحات (فارسی):</h6>
+                                        <p>@Model.DescriptionPersian</p>
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(Model.Notes))
+                                {
+                                    <div class="mb-3">
+                                        <h6>یادداشت:</h6>
+                                        <p>@Model.Notes</p>
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(Model.NotesPersian))
+                                {
+                                    <div class="mb-3">
+                                        <h6>یادداشت (فارسی):</h6>
+                                        <p>@Model.NotesPersian</p>
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(Model.FailureReason))
+                                {
+                                    <div class="mb-3">
+                                        <h6>دلیل شکست:</h6>
+                                        <p class="text-danger">@Model.FailureReason</p>
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(Model.FailureReasonPersian))
+                                {
+                                    <div class="mb-3">
+                                        <h6>دلیل شکست (فارسی):</h6>
+                                        <p class="text-danger">@Model.FailureReasonPersian</p>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div class="col-md-4">
+                    <!-- Actions -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">عملیات / Actions</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="btn-group-vertical d-block">
+                                <a href="@Url.Action("Payments")" class="btn btn-secondary mb-2">
+                                    <i class="fas fa-arrow-left"></i> بازگشت به لیست
+                                </a>
+                                
+                                @if (Model.Status == PaymentStatus.Completed)
+                                {
+                                    <a href="@Url.Action("RefundPayment", new { id = Model.Id })" class="btn btn-warning mb-2">
+                                        <i class="fas fa-undo"></i> بازگشت پرداخت
+                                    </a>
+                                }
+                                
+                                @if (Model.Status == PaymentStatus.Pending || Model.Status == PaymentStatus.Processing)
+                                {
+                                    <button type="button" class="btn btn-danger mb-2" onclick="cancelPayment('@Model.Id')">
+                                        <i class="fas fa-times"></i> لغو پرداخت
+                                    </button>
+                                }
+                                
+                                <button type="button" class="btn btn-info mb-2" data-toggle="modal" data-target="#updateStatusModal">
+                                    <i class="fas fa-edit"></i> تغییر وضعیت
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- Update Status Modal -->
+<div class="modal fade" id="updateStatusModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">تغییر وضعیت پرداخت / Update Payment Status</h4>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <form method="post" action="@Url.Action("UpdatePaymentStatus", new { id = Model.Id })">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="Status">وضعیت جدید:</label>
+                        <select class="form-control" id="Status" name="Status" required>
+                            <option value="">انتخاب کنید</option>
+                            <option value="1" @(Model.Status == PaymentStatus.Pending ? "selected" : "")>در انتظار</option>
+                            <option value="2" @(Model.Status == PaymentStatus.Processing ? "selected" : "")>در حال پردازش</option>
+                            <option value="3" @(Model.Status == PaymentStatus.Completed ? "selected" : "")>تکمیل شده</option>
+                            <option value="4" @(Model.Status == PaymentStatus.Failed ? "selected" : "")>ناموفق</option>
+                            <option value="5" @(Model.Status == PaymentStatus.Cancelled ? "selected" : "")>لغو شده</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="TransactionId">شناسه تراکنش:</label>
+                        <input type="text" class="form-control" id="TransactionId" name="TransactionId" value="@Model.TransactionId">
+                    </div>
+                    <div class="form-group">
+                        <label for="ReferenceNumber">شماره مرجع:</label>
+                        <input type="text" class="form-control" id="ReferenceNumber" name="ReferenceNumber" value="@Model.ReferenceNumber">
+                    </div>
+                    <div class="form-group">
+                        <label for="BankName">نام بانک:</label>
+                        <input type="text" class="form-control" id="BankName" name="BankName" value="@Model.BankName">
+                    </div>
+                    <div class="form-group">
+                        <label for="BankNamePersian">نام بانک (فارسی):</label>
+                        <input type="text" class="form-control" id="BankNamePersian" name="BankNamePersian" value="@Model.BankNamePersian">
+                    </div>
+                    <div class="form-group">
+                        <label for="Notes">یادداشت:</label>
+                        <textarea class="form-control" id="Notes" name="Notes" rows="3">@Model.Notes</textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">انصراف</button>
+                    <button type="submit" class="btn btn-primary">بروزرسانی</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Cancel Payment Modal -->
+<div class="modal fade" id="cancelPaymentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">لغو پرداخت / Cancel Payment</h4>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <form id="cancelPaymentForm" method="post" action="@Url.Action("CancelPayment", new { id = Model.Id })">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="reason">دلیل لغو (انگلیسی):</label>
+                        <textarea class="form-control" id="reason" name="reason" rows="3" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="reasonPersian">دلیل لغو (فارسی):</label>
+                        <textarea class="form-control" id="reasonPersian" name="reasonPersian" rows="3" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">انصراف</button>
+                    <button type="submit" class="btn btn-danger">لغو پرداخت</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function cancelPayment(paymentId) {
+            $('#cancelPaymentModal').modal('show');
+        }
+    </script>
+}

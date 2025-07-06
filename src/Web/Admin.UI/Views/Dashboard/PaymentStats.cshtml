@@ -1,0 +1,278 @@
+@model Admin.UI.Models.PaymentStatsViewModel
+@{
+    ViewData["Title"] = "آمار پرداخت‌ها / Payment Statistics";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0">@ViewData["Title"]</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="@Url.Action("Index", "Dashboard")">داشبورد</a></li>
+                        <li class="breadcrumb-item"><a href="@Url.Action("Payments", "Dashboard")">پرداخت‌ها</a></li>
+                        <li class="breadcrumb-item active">آمار</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="content">
+        <div class="container-fluid">
+            <!-- Statistics Cards -->
+            <div class="row">
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-info">
+                        <div class="inner">
+                            <h3>@Model.TotalPayments.ToString("N0")</h3>
+                            <p>کل پرداخت‌ها / Total Payments</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-credit-card"></i>
+                        </div>
+                        <a href="@Url.Action("Payments")" class="small-box-footer">
+                            مشاهده جزئیات <i class="fas fa-arrow-circle-right"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-success">
+                        <div class="inner">
+                            <h3>@Model.CompletedPayments.ToString("N0")</h3>
+                            <p>پرداخت‌های موفق / Successful</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <a href="@Url.Action("Payments", new { status = 3 })" class="small-box-footer">
+                            مشاهده جزئیات <i class="fas fa-arrow-circle-right"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-warning">
+                        <div class="inner">
+                            <h3>@Model.PendingPayments.ToString("N0")</h3>
+                            <p>در انتظار / Pending</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <a href="@Url.Action("Payments", new { status = 1 })" class="small-box-footer">
+                            مشاهده جزئیات <i class="fas fa-arrow-circle-right"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-danger">
+                        <div class="inner">
+                            <h3>@Model.FailedPayments.ToString("N0")</h3>
+                            <p>ناموفق / Failed</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-times-circle"></i>
+                        </div>
+                        <a href="@Url.Action("Payments", new { status = 4 })" class="small-box-footer">
+                            مشاهده جزئیات <i class="fas fa-arrow-circle-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Amount Statistics -->
+            <div class="row">
+                <div class="col-lg-3 col-6">
+                    <div class="info-box">
+                        <span class="info-box-icon bg-primary"><i class="fas fa-coins"></i></span>
+                        <div class="info-box-content">
+                            <span class="info-box-text">کل مبلغ / Total Amount</span>
+                            <span class="info-box-number">@Model.TotalAmount.ToString("N0") تومان</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-6">
+                    <div class="info-box">
+                        <span class="info-box-icon bg-success"><i class="fas fa-chart-line"></i></span>
+                        <div class="info-box-content">
+                            <span class="info-box-text">امروز / Today</span>
+                            <span class="info-box-number">@Model.TodayAmount.ToString("N0") تومان</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-6">
+                    <div class="info-box">
+                        <span class="info-box-icon bg-warning"><i class="fas fa-calendar-alt"></i></span>
+                        <div class="info-box-content">
+                            <span class="info-box-text">این ماه / This Month</span>
+                            <span class="info-box-number">@Model.ThisMonthAmount.ToString("N0") تومان</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-6">
+                    <div class="info-box">
+                        <span class="info-box-icon bg-info"><i class="fas fa-calculator"></i></span>
+                        <div class="info-box-content">
+                            <span class="info-box-text">میانگین / Average</span>
+                            <span class="info-box-number">@Model.AverageTransactionAmount.ToString("N0") تومان</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts -->
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-chart-pie mr-1"></i>
+                                توزیع وضعیت پرداخت‌ها / Payment Status Distribution
+                            </h3>
+                            <div class="card-tools">
+                                <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="statusChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-chart-bar mr-1"></i>
+                                آمار تفصیلی / Detailed Statistics
+                            </h3>
+                            <div class="card-tools">
+                                <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <tbody>
+                                        <tr>
+                                            <td><span class="badge badge-warning">در انتظار</span></td>
+                                            <td>@Model.PendingPayments پرداخت</td>
+                                            <td class="text-right">@((Model.TotalPayments > 0 ? (double)Model.PendingPayments / Model.TotalPayments * 100 : 0).ToString("F1"))%</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="badge badge-info">در حال پردازش</span></td>
+                                            <td>@Model.ProcessingPayments پرداخت</td>
+                                            <td class="text-right">@((Model.TotalPayments > 0 ? (double)Model.ProcessingPayments / Model.TotalPayments * 100 : 0).ToString("F1"))%</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="badge badge-success">تکمیل شده</span></td>
+                                            <td>@Model.CompletedPayments پرداخت</td>
+                                            <td class="text-right">@((Model.TotalPayments > 0 ? (double)Model.CompletedPayments / Model.TotalPayments * 100 : 0).ToString("F1"))%</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="badge badge-danger">ناموفق</span></td>
+                                            <td>@Model.FailedPayments پرداخت</td>
+                                            <td class="text-right">@((Model.TotalPayments > 0 ? (double)Model.FailedPayments / Model.TotalPayments * 100 : 0).ToString("F1"))%</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="badge badge-secondary">لغو شده</span></td>
+                                            <td>@Model.CancelledPayments پرداخت</td>
+                                            <td class="text-right">@((Model.TotalPayments > 0 ? (double)Model.CancelledPayments / Model.TotalPayments * 100 : 0).ToString("F1"))%</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="badge badge-dark">بازگشت داده شده</span></td>
+                                            <td>@Model.RefundedPayments پرداخت</td>
+                                            <td class="text-right">@((Model.TotalPayments > 0 ? (double)Model.RefundedPayments / Model.TotalPayments * 100 : 0).ToString("F1"))%</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">عملیات سریع / Quick Actions</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <a href="@Url.Action("Payments")" class="btn btn-primary btn-block">
+                                        <i class="fas fa-list"></i> مشاهده همه پرداخت‌ها
+                                    </a>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <a href="@Url.Action("Payments", new { status = 1 })" class="btn btn-warning btn-block">
+                                        <i class="fas fa-clock"></i> پرداخت‌های در انتظار
+                                    </a>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <a href="@Url.Action("Payments", new { status = 4 })" class="btn btn-danger btn-block">
+                                        <i class="fas fa-times-circle"></i> پرداخت‌های ناموفق
+                                    </a>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <a href="@Url.Action("Payments", new { startDate = DateTime.Today.ToString("yyyy-MM-dd") })" class="btn btn-success btn-block">
+                                        <i class="fas fa-calendar-day"></i> پرداخت‌های امروز
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Status Chart
+            var statusChartData = @Html.Raw(Json.Serialize(Model.StatusChart));
+            
+            var ctx = document.getElementById('statusChart').getContext('2d');
+            var statusChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: statusChartData.map(item => item.label),
+                    datasets: [{
+                        data: statusChartData.map(item => item.value),
+                        backgroundColor: statusChartData.map(item => item.color),
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+}

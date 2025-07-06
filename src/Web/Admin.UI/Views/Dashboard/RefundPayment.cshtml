@@ -1,0 +1,157 @@
+@model Admin.UI.Models.RefundPaymentViewModel
+@{
+    ViewData["Title"] = $"بازگشت پرداخت / Refund Payment - {Model.PaymentNumber}";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0">@ViewData["Title"]</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="@Url.Action("Index", "Dashboard")">داشبورد</a></li>
+                        <li class="breadcrumb-item"><a href="@Url.Action("Payments", "Dashboard")">پرداخت‌ها</a></li>
+                        <li class="breadcrumb-item"><a href="@Url.Action("PaymentDetails", new { id = Model.Id })">جزئیات پرداخت</a></li>
+                        <li class="breadcrumb-item active">بازگشت پرداخت</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">بازگشت پرداخت / Refund Payment</h3>
+                        </div>
+                        <form method="post" action="@Url.Action("RefundPayment")">
+                            @Html.AntiForgeryToken()
+                            @Html.HiddenFor(m => m.Id)
+                            @Html.HiddenFor(m => m.PaymentNumber)
+                            @Html.HiddenFor(m => m.Amount)
+                            @Html.HiddenFor(m => m.CustomerName)
+                            
+                            <div class="card-body">
+                                <!-- Payment Information -->
+                                <div class="alert alert-info">
+                                    <h5><i class="icon fas fa-info"></i> اطلاعات پرداخت / Payment Information</h5>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <p><strong>شماره پرداخت:</strong> @Model.PaymentNumber</p>
+                                            <p><strong>نام مشتری:</strong> @Model.CustomerName</p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <p><strong>مبلغ:</strong> @Model.Amount.ToString("N0") تومان</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Refund Form -->
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label for="Reason" class="required">دلیل بازگشت (انگلیسی) / Refund Reason (English) <span class="text-danger">*</span>:</label>
+                                            @Html.TextAreaFor(m => m.Reason, new { @class = "form-control", rows = "4", placeholder = "Enter the reason for refund in English...", required = "required" })
+                                            @Html.ValidationMessageFor(m => m.Reason, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label for="ReasonPersian" class="required">دلیل بازگشت (فارسی) / Refund Reason (Persian) <span class="text-danger">*</span>:</label>
+                                            @Html.TextAreaFor(m => m.ReasonPersian, new { @class = "form-control", rows = "4", placeholder = "دلیل بازگشت پرداخت را به فارسی وارد کنید...", required = "required" })
+                                            @Html.ValidationMessageFor(m => m.ReasonPersian, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Warning -->
+                                <div class="alert alert-warning">
+                                    <h5><i class="icon fas fa-exclamation-triangle"></i> هشدار / Warning</h5>
+                                    <p>
+                                        لطفاً توجه داشته باشید که پس از تأیید بازگشت پرداخت، این عمل قابل برگشت نیست. 
+                                        مبلغ پرداخت شده به حساب مشتری بازگردانده خواهد شد.
+                                    </p>
+                                    <p class="mb-0">
+                                        <strong>Please note that once the refund is confirmed, this action cannot be undone. 
+                                        The payment amount will be returned to the customer's account.</strong>
+                                    </p>
+                                </div>
+
+                                <!-- Confirmation Checkbox -->
+                                <div class="form-group">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" id="confirmRefund" required>
+                                        <label class="form-check-label" for="confirmRefund">
+                                            تأیید می‌کنم که از بازگشت این پرداخت اطمینان دارم / I confirm that I want to refund this payment
+                                            <span class="text-danger">*</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card-footer">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <a href="@Url.Action("PaymentDetails", new { id = Model.Id })" class="btn btn-secondary">
+                                            <i class="fas fa-arrow-left"></i> انصراف / Cancel
+                                        </a>
+                                    </div>
+                                    <div class="col-md-6 text-right">
+                                        <button type="submit" class="btn btn-warning" id="refundButton" disabled>
+                                            <i class="fas fa-undo"></i> بازگشت پرداخت / Refund Payment
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Enable/disable refund button based on confirmation checkbox
+            $('#confirmRefund').change(function() {
+                var isChecked = $(this).is(':checked');
+                var reasonFilled = $('#Reason').val().trim() !== '';
+                var reasonPersianFilled = $('#ReasonPersian').val().trim() !== '';
+                
+                $('#refundButton').prop('disabled', !(isChecked && reasonFilled && reasonPersianFilled));
+            });
+
+            // Check reason fields on input
+            $('#Reason, #ReasonPersian').on('input', function() {
+                var isChecked = $('#confirmRefund').is(':checked');
+                var reasonFilled = $('#Reason').val().trim() !== '';
+                var reasonPersianFilled = $('#ReasonPersian').val().trim() !== '';
+                
+                $('#refundButton').prop('disabled', !(isChecked && reasonFilled && reasonPersianFilled));
+            });
+
+            // Confirmation before submit
+            $('form').submit(function(e) {
+                var confirmed = confirm('آیا از بازگشت این پرداخت اطمینان دارید؟ این عمل قابل برگشت نیست.\n\nAre you sure you want to refund this payment? This action cannot be undone.');
+                if (!confirmed) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+        });
+    </script>
+
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

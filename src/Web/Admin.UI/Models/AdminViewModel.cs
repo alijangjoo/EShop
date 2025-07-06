@@ -306,3 +306,144 @@ public class UserProfileViewModel
     public DateTime CreatedAt { get; set; }
     public DateTime LastLoginAt { get; set; }
 }
+
+// Payment Management Models
+public class PaymentManagementViewModel
+{
+    public List<PaymentViewModel> Payments { get; set; } = new();
+    public int TotalPayments { get; set; }
+    public int CurrentPage { get; set; }
+    public int PageSize { get; set; }
+    public int TotalPages { get; set; }
+    public string? SearchTerm { get; set; }
+    public PaymentStatus? Status { get; set; }
+    public PaymentMethod? PaymentMethod { get; set; }
+    public DateTime? FromDate { get; set; }
+    public DateTime? ToDate { get; set; }
+    public decimal? MinAmount { get; set; }
+    public decimal? MaxAmount { get; set; }
+    public string? SortBy { get; set; }
+    public bool SortDescending { get; set; }
+}
+
+public class PaymentViewModel
+{
+    public Guid Id { get; set; }
+    public string PaymentNumber { get; set; } = string.Empty;
+    public Guid OrderId { get; set; }
+    public string UserName { get; set; } = string.Empty;
+    public decimal Amount { get; set; }
+    public PaymentMethod PaymentMethod { get; set; }
+    public PaymentStatus Status { get; set; }
+    
+    // Customer Information
+    public string CustomerName { get; set; } = string.Empty;
+    public string CustomerEmail { get; set; } = string.Empty;
+    public string CustomerPhone { get; set; } = string.Empty;
+    
+    // Payment Details
+    public string? CardName { get; set; }
+    public string? CardLastFourDigits { get; set; }
+    public string? TransactionId { get; set; }
+    public string? ReferenceNumber { get; set; }
+    public string? GatewayTransactionId { get; set; }
+    public string? BankName { get; set; }
+    public string? BankNamePersian { get; set; }
+    
+    // Timestamps
+    public DateTime PaymentDate { get; set; }
+    public DateTime? ProcessedDate { get; set; }
+    public DateTime? CompletedDate { get; set; }
+    
+    // Additional Information
+    public string? Description { get; set; }
+    public string? DescriptionPersian { get; set; }
+    public string? Notes { get; set; }
+    public string? NotesPersian { get; set; }
+    public string? FailureReason { get; set; }
+    public string? FailureReasonPersian { get; set; }
+    
+    // Audit Fields
+    public DateTime CreatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
+    public string CreatedBy { get; set; } = string.Empty;
+    public string UpdatedBy { get; set; } = string.Empty;
+}
+
+public class PaymentStatsViewModel
+{
+    public int TotalPayments { get; set; }
+    public int PendingPayments { get; set; }
+    public int ProcessingPayments { get; set; }
+    public int CompletedPayments { get; set; }
+    public int FailedPayments { get; set; }
+    public int CancelledPayments { get; set; }
+    public int RefundedPayments { get; set; }
+    public decimal TotalAmount { get; set; }
+    public decimal TodayAmount { get; set; }
+    public decimal ThisMonthAmount { get; set; }
+    public decimal AverageTransactionAmount { get; set; }
+    public int IPGPayments { get; set; }
+    public int CashPayments { get; set; }
+    public List<ChartDataViewModel> StatusChart { get; set; } = new();
+    public List<ChartDataViewModel> MethodChart { get; set; } = new();
+}
+
+public class PaymentFilterViewModel
+{
+    public Guid? OrderId { get; set; }
+    public string? UserName { get; set; }
+    public PaymentMethod? PaymentMethod { get; set; }
+    public PaymentStatus? Status { get; set; }
+    public DateTime? FromDate { get; set; }
+    public DateTime? ToDate { get; set; }
+    public decimal? MinAmount { get; set; }
+    public decimal? MaxAmount { get; set; }
+    public string? SearchTerm { get; set; }
+    public int Page { get; set; } = 1;
+    public int PageSize { get; set; } = 20;
+    public string? SortBy { get; set; } = "PaymentDate";
+    public bool SortDescending { get; set; } = true;
+}
+
+public class UpdatePaymentStatusViewModel
+{
+    public Guid Id { get; set; }
+    public PaymentStatus Status { get; set; }
+    public string? TransactionId { get; set; }
+    public string? ReferenceNumber { get; set; }
+    public string? GatewayTransactionId { get; set; }
+    public string? BankName { get; set; }
+    public string? BankNamePersian { get; set; }
+    public string? FailureReason { get; set; }
+    public string? FailureReasonPersian { get; set; }
+    public string? Notes { get; set; }
+    public string? NotesPersian { get; set; }
+}
+
+public class RefundPaymentViewModel
+{
+    public Guid Id { get; set; }
+    public string PaymentNumber { get; set; } = string.Empty;
+    public decimal Amount { get; set; }
+    public string CustomerName { get; set; } = string.Empty;
+    public string Reason { get; set; } = string.Empty;
+    public string ReasonPersian { get; set; } = string.Empty;
+}
+
+// Payment Enums
+public enum PaymentMethod
+{
+    IPG = 1,
+    Cash = 2
+}
+
+public enum PaymentStatus
+{
+    Pending = 1,
+    Processing = 2,
+    Completed = 3,
+    Failed = 4,
+    Cancelled = 5,
+    Refunded = 6
+}
