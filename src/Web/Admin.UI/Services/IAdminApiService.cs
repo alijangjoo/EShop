@@ -47,6 +47,16 @@ public interface IAdminApiService
     Task<string?> LoginAsync(LoginViewModel model);
     Task<UserProfileViewModel?> GetUserProfileAsync();
     Task LogoutAsync();
+    
+    // Payment Management
+    Task<PaymentManagementViewModel> GetPaymentsAsync(PaymentFilterViewModel filter);
+    Task<PaymentViewModel?> GetPaymentByIdAsync(Guid id);
+    Task<PaymentViewModel?> GetPaymentByNumberAsync(string paymentNumber);
+    Task<PaymentViewModel?> GetPaymentByOrderIdAsync(Guid orderId);
+    Task<PaymentStatsViewModel> GetPaymentStatsAsync();
+    Task<bool> UpdatePaymentStatusAsync(Guid id, UpdatePaymentStatusViewModel model);
+    Task<bool> RefundPaymentAsync(Guid id, RefundPaymentViewModel model);
+    Task<bool> CancelPaymentAsync(Guid id, string reason, string reasonPersian);
 }
 
 public class AdminApiService : IAdminApiService
@@ -767,4 +777,527 @@ public class AdminApiService : IAdminApiService
             _logger.LogError(ex, "Error during admin logout");
         }
     }
+    
+    // Payment Management Implementation
+    public async Task<PaymentManagementViewModel> GetPaymentsAsync(PaymentFilterViewModel filter)
+    {
+        try
+        {
+            SetAuthorizationHeader();
+            
+            var queryParams = new List<string>
+            {
+                $"page={filter.Page}",
+                $"pageSize={filter.PageSize}",
+                $"sortBy={filter.SortBy}",
+                $"sortDescending={filter.SortDescending}"
+            };
+
+            if (filter.OrderId.HasValue)
+                queryParams.Add($"orderId={filter.OrderId.Value}");
+            
+            if (!string.IsNullOrEmpty(filter.UserName))
+                queryParams.Add($"userName={Uri.EscapeDataString(filter.UserName)}");
+            
+            if (filter.PaymentMethod.HasValue)
+                queryParams.Add($"paymentMethod={(int)filter.PaymentMethod.Value}");
+            
+            if (filter.Status.HasValue)
+                queryParams.Add($"status={(int)filter.Status.Value}");
+            
+            if (filter.FromDate.HasValue)
+                queryParams.Add($"fromDate={filter.FromDate.Value:yyyy-MM-dd}");
+            
+            if (filter.ToDate.HasValue)
+                queryParams.Add($"toDate={filter.ToDate.Value:yyyy-MM-dd}");
+            
+            if (filter.MinAmount.HasValue)
+                queryParams.Add($"minAmount={filter.MinAmount.Value}");
+            
+            if (filter.MaxAmount.HasValue)
+                queryParams.Add($"maxAmount={filter.MaxAmount.Value}");
+            
+            if (!string.IsNullOrEmpty(filter.SearchTerm))
+                queryParams.Add($"searchTerm={Uri.EscapeDataString(filter.SearchTerm)}");
+
+            var query = string.Join("&", queryParams);
+            var response = await _httpClient.GetAsync($"{_configuration["ApiSettings:PaymentApi"]}/api/payment?{query}");
+            
+            if (response.IsSuccessStatusCode)
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                var paginatedResult = System.Text.Json.JsonSerializer.Deserialize<PaginatedPaymentResult>(content, new System.Text.Json.JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+                if (paginatedResult != null)
+                {
+                    return new PaymentManagementViewModel
+                    {
+                        Payments = paginatedResult.Payments.Select(p => new PaymentViewModel
+                        {
+                            Id = p.Id,
+                            PaymentNumber = p.PaymentNumber,
+                            OrderId = p.OrderId,
+                            UserName = p.UserName,
+                            Amount = p.Amount,
+                            PaymentMethod = (PaymentMethod)p.PaymentMethod,
+                            Status = (PaymentStatus)p.Status,
+                            CustomerName = p.CustomerName,
+                            CustomerEmail = p.CustomerEmail,
+                            CustomerPhone = p.CustomerPhone,
+                            CardName = p.CardName,
+                            CardLastFourDigits = p.CardLastFourDigits,
+                            TransactionId = p.TransactionId,
+                            ReferenceNumber = p.ReferenceNumber,
+                            GatewayTransactionId = p.GatewayTransactionId,
+                            BankName = p.BankName,
+                            BankNamePersian = p.BankNamePersian,
+                            PaymentDate = p.PaymentDate,
+                            ProcessedDate = p.ProcessedDate,
+                            CompletedDate = p.CompletedDate,
+                            Description = p.Description,
+                            DescriptionPersian = p.DescriptionPersian,
+                            Notes = p.Notes,
+                            NotesPersian = p.NotesPersian,
+                            FailureReason = p.FailureReason,
+                            FailureReasonPersian = p.FailureReasonPersian,
+                            CreatedAt = p.CreatedAt,
+                            UpdatedAt = p.UpdatedAt,
+                            CreatedBy = p.CreatedBy,
+                            UpdatedBy = p.UpdatedBy
+                        }).ToList(),
+                        TotalPayments = paginatedResult.TotalCount,
+                        CurrentPage = paginatedResult.Page,
+                        PageSize = paginatedResult.PageSize,
+                        TotalPages = paginatedResult.TotalPages,
+                        SearchTerm = filter.SearchTerm,
+                        Status = filter.Status,
+                        PaymentMethod = filter.PaymentMethod,
+                        FromDate = filter.FromDate,
+                        ToDate = filter.ToDate,
+                        MinAmount = filter.MinAmount,
+                        MaxAmount = filter.MaxAmount,
+                        SortBy = filter.SortBy,
+                        SortDescending = filter.SortDescending
+                    };
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting payments");
+        }
+
+        return new PaymentManagementViewModel();
+    }
+
+    public async Task<PaymentViewModel?> GetPaymentByIdAsync(Guid id)
+    {
+        try
+        {
+            SetAuthorizationHeader();
+            
+            var response = await _httpClient.GetAsync($"{_configuration["ApiSettings:PaymentApi"]}/api/payment/{id}");
+            
+            if (response.IsSuccessStatusCode)
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                var payment = System.Text.Json.JsonSerializer.Deserialize<PaymentApiDto>(content, new System.Text.Json.JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+                if (payment != null)
+                {
+                    return new PaymentViewModel
+                    {
+                        Id = payment.Id,
+                        PaymentNumber = payment.PaymentNumber,
+                        OrderId = payment.OrderId,
+                        UserName = payment.UserName,
+                        Amount = payment.Amount,
+                        PaymentMethod = (PaymentMethod)payment.PaymentMethod,
+                        Status = (PaymentStatus)payment.Status,
+                        CustomerName = payment.CustomerName,
+                        CustomerEmail = payment.CustomerEmail,
+                        CustomerPhone = payment.CustomerPhone,
+                        CardName = payment.CardName,
+                        CardLastFourDigits = payment.CardLastFourDigits,
+                        TransactionId = payment.TransactionId,
+                        ReferenceNumber = payment.ReferenceNumber,
+                        GatewayTransactionId = payment.GatewayTransactionId,
+                        BankName = payment.BankName,
+                        BankNamePersian = payment.BankNamePersian,
+                        PaymentDate = payment.PaymentDate,
+                        ProcessedDate = payment.ProcessedDate,
+                        CompletedDate = payment.CompletedDate,
+                        Description = payment.Description,
+                        DescriptionPersian = payment.DescriptionPersian,
+                        Notes = payment.Notes,
+                        NotesPersian = payment.NotesPersian,
+                        FailureReason = payment.FailureReason,
+                        FailureReasonPersian = payment.FailureReasonPersian,
+                        CreatedAt = payment.CreatedAt,
+                        UpdatedAt = payment.UpdatedAt,
+                        CreatedBy = payment.CreatedBy,
+                        UpdatedBy = payment.UpdatedBy
+                    };
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting payment {PaymentId}", id);
+        }
+
+        return null;
+    }
+
+    public async Task<PaymentViewModel?> GetPaymentByNumberAsync(string paymentNumber)
+    {
+        try
+        {
+            SetAuthorizationHeader();
+            
+            var response = await _httpClient.GetAsync($"{_configuration["ApiSettings:PaymentApi"]}/api/payment/number/{paymentNumber}");
+            
+            if (response.IsSuccessStatusCode)
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                var payment = System.Text.Json.JsonSerializer.Deserialize<PaymentApiDto>(content, new System.Text.Json.JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+                if (payment != null)
+                {
+                    return new PaymentViewModel
+                    {
+                        Id = payment.Id,
+                        PaymentNumber = payment.PaymentNumber,
+                        OrderId = payment.OrderId,
+                        UserName = payment.UserName,
+                        Amount = payment.Amount,
+                        PaymentMethod = (PaymentMethod)payment.PaymentMethod,
+                        Status = (PaymentStatus)payment.Status,
+                        CustomerName = payment.CustomerName,
+                        CustomerEmail = payment.CustomerEmail,
+                        CustomerPhone = payment.CustomerPhone,
+                        CardName = payment.CardName,
+                        CardLastFourDigits = payment.CardLastFourDigits,
+                        TransactionId = payment.TransactionId,
+                        ReferenceNumber = payment.ReferenceNumber,
+                        GatewayTransactionId = payment.GatewayTransactionId,
+                        BankName = payment.BankName,
+                        BankNamePersian = payment.BankNamePersian,
+                        PaymentDate = payment.PaymentDate,
+                        ProcessedDate = payment.ProcessedDate,
+                        CompletedDate = payment.CompletedDate,
+                        Description = payment.Description,
+                        DescriptionPersian = payment.DescriptionPersian,
+                        Notes = payment.Notes,
+                        NotesPersian = payment.NotesPersian,
+                        FailureReason = payment.FailureReason,
+                        FailureReasonPersian = payment.FailureReasonPersian,
+                        CreatedAt = payment.CreatedAt,
+                        UpdatedAt = payment.UpdatedAt,
+                        CreatedBy = payment.CreatedBy,
+                        UpdatedBy = payment.UpdatedBy
+                    };
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting payment by number {PaymentNumber}", paymentNumber);
+        }
+
+        return null;
+    }
+
+    public async Task<PaymentViewModel?> GetPaymentByOrderIdAsync(Guid orderId)
+    {
+        try
+        {
+            SetAuthorizationHeader();
+            
+            var response = await _httpClient.GetAsync($"{_configuration["ApiSettings:PaymentApi"]}/api/payment/order/{orderId}");
+            
+            if (response.IsSuccessStatusCode)
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                var payment = System.Text.Json.JsonSerializer.Deserialize<PaymentApiDto>(content, new System.Text.Json.JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+                if (payment != null)
+                {
+                    return new PaymentViewModel
+                    {
+                        Id = payment.Id,
+                        PaymentNumber = payment.PaymentNumber,
+                        OrderId = payment.OrderId,
+                        UserName = payment.UserName,
+                        Amount = payment.Amount,
+                        PaymentMethod = (PaymentMethod)payment.PaymentMethod,
+                        Status = (PaymentStatus)payment.Status,
+                        CustomerName = payment.CustomerName,
+                        CustomerEmail = payment.CustomerEmail,
+                        CustomerPhone = payment.CustomerPhone,
+                        CardName = payment.CardName,
+                        CardLastFourDigits = payment.CardLastFourDigits,
+                        TransactionId = payment.TransactionId,
+                        ReferenceNumber = payment.ReferenceNumber,
+                        GatewayTransactionId = payment.GatewayTransactionId,
+                        BankName = payment.BankName,
+                        BankNamePersian = payment.BankNamePersian,
+                        PaymentDate = payment.PaymentDate,
+                        ProcessedDate = payment.ProcessedDate,
+                        CompletedDate = payment.CompletedDate,
+                        Description = payment.Description,
+                        DescriptionPersian = payment.DescriptionPersian,
+                        Notes = payment.Notes,
+                        NotesPersian = payment.NotesPersian,
+                        FailureReason = payment.FailureReason,
+                        FailureReasonPersian = payment.FailureReasonPersian,
+                        CreatedAt = payment.CreatedAt,
+                        UpdatedAt = payment.UpdatedAt,
+                        CreatedBy = payment.CreatedBy,
+                        UpdatedBy = payment.UpdatedBy
+                    };
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting payment by order ID {OrderId}", orderId);
+        }
+
+        return null;
+    }
+
+    public async Task<PaymentStatsViewModel> GetPaymentStatsAsync()
+    {
+        try
+        {
+            SetAuthorizationHeader();
+            
+            var response = await _httpClient.GetAsync($"{_configuration["ApiSettings:PaymentApi"]}/api/payment/stats");
+            
+            if (response.IsSuccessStatusCode)
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                var stats = System.Text.Json.JsonSerializer.Deserialize<PaymentStatsDto>(content, new System.Text.Json.JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+                if (stats != null)
+                {
+                    return new PaymentStatsViewModel
+                    {
+                        TotalPayments = stats.StatusStats.Sum(s => s.Count),
+                        PendingPayments = stats.StatusStats.FirstOrDefault(s => s.Status == 1)?.Count ?? 0,
+                        ProcessingPayments = stats.StatusStats.FirstOrDefault(s => s.Status == 2)?.Count ?? 0,
+                        CompletedPayments = stats.StatusStats.FirstOrDefault(s => s.Status == 3)?.Count ?? 0,
+                        FailedPayments = stats.StatusStats.FirstOrDefault(s => s.Status == 4)?.Count ?? 0,
+                        CancelledPayments = stats.StatusStats.FirstOrDefault(s => s.Status == 5)?.Count ?? 0,
+                        RefundedPayments = stats.StatusStats.FirstOrDefault(s => s.Status == 6)?.Count ?? 0,
+                        TotalAmount = stats.TotalAll,
+                        TodayAmount = stats.TotalToday,
+                        ThisMonthAmount = stats.TotalThisMonth,
+                        AverageTransactionAmount = stats.TotalAll / Math.Max(stats.StatusStats.Sum(s => s.Count), 1),
+                        StatusChart = stats.StatusStats.Select(s => new ChartDataViewModel
+                        {
+                            Label = GetStatusLabel(s.Status),
+                            Value = s.Count,
+                            Color = GetStatusColor(s.Status)
+                        }).ToList()
+                    };
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting payment stats");
+        }
+
+        return new PaymentStatsViewModel();
+    }
+
+    public async Task<bool> UpdatePaymentStatusAsync(Guid id, UpdatePaymentStatusViewModel model)
+    {
+        try
+        {
+            SetAuthorizationHeader();
+            
+            var payload = new
+            {
+                status = (int)model.Status,
+                transactionId = model.TransactionId,
+                referenceNumber = model.ReferenceNumber,
+                gatewayTransactionId = model.GatewayTransactionId,
+                bankName = model.BankName,
+                bankNamePersian = model.BankNamePersian,
+                failureReason = model.FailureReason,
+                failureReasonPersian = model.FailureReasonPersian,
+                notes = model.Notes,
+                notesPersian = model.NotesPersian
+            };
+            
+            var json = System.Text.Json.JsonSerializer.Serialize(payload);
+            var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+            
+            var response = await _httpClient.PutAsync($"{_configuration["ApiSettings:PaymentApi"]}/api/payment/{id}/status", content);
+            
+            return response.IsSuccessStatusCode;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating payment status");
+            return false;
+        }
+    }
+
+    public async Task<bool> RefundPaymentAsync(Guid id, RefundPaymentViewModel model)
+    {
+        try
+        {
+            SetAuthorizationHeader();
+            
+            var payload = new
+            {
+                reason = model.Reason,
+                reasonPersian = model.ReasonPersian
+            };
+            
+            var json = System.Text.Json.JsonSerializer.Serialize(payload);
+            var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+            
+            var response = await _httpClient.PostAsync($"{_configuration["ApiSettings:PaymentApi"]}/api/payment/{id}/refund", content);
+            
+            return response.IsSuccessStatusCode;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error refunding payment");
+            return false;
+        }
+    }
+
+    public async Task<bool> CancelPaymentAsync(Guid id, string reason, string reasonPersian)
+    {
+        try
+        {
+            SetAuthorizationHeader();
+            
+            var payload = new
+            {
+                reason = reason,
+                reasonPersian = reasonPersian
+            };
+            
+            var json = System.Text.Json.JsonSerializer.Serialize(payload);
+            var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+            
+            var response = await _httpClient.PostAsync($"{_configuration["ApiSettings:PaymentApi"]}/api/payment/{id}/cancel", content);
+            
+            return response.IsSuccessStatusCode;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error cancelling payment");
+            return false;
+        }
+    }
+
+    // Helper methods
+    private string GetStatusLabel(int status)
+    {
+        return status switch
+        {
+            1 => "در انتظار",
+            2 => "در حال پردازش",
+            3 => "تکمیل شده",
+            4 => "ناموفق",
+            5 => "لغو شده",
+            6 => "بازگشت داده شده",
+            _ => "نامشخص"
+        };
+    }
+
+    private string GetStatusColor(int status)
+    {
+        return status switch
+        {
+            1 => "#ffc107", // warning
+            2 => "#17a2b8", // info
+            3 => "#28a745", // success
+            4 => "#dc3545", // danger
+            5 => "#6c757d", // secondary
+            6 => "#fd7e14", // warning
+            _ => "#6c757d"
+        };
+    }
+}
+
+// Helper DTOs for API responses
+public class PaymentApiDto
+{
+    public Guid Id { get; set; }
+    public string PaymentNumber { get; set; } = string.Empty;
+    public Guid OrderId { get; set; }
+    public string UserName { get; set; } = string.Empty;
+    public decimal Amount { get; set; }
+    public int PaymentMethod { get; set; }
+    public int Status { get; set; }
+    public string CustomerName { get; set; } = string.Empty;
+    public string CustomerEmail { get; set; } = string.Empty;
+    public string CustomerPhone { get; set; } = string.Empty;
+    public string? CardName { get; set; }
+    public string? CardLastFourDigits { get; set; }
+    public string? TransactionId { get; set; }
+    public string? ReferenceNumber { get; set; }
+    public string? GatewayTransactionId { get; set; }
+    public string? BankName { get; set; }
+    public string? BankNamePersian { get; set; }
+    public DateTime PaymentDate { get; set; }
+    public DateTime? ProcessedDate { get; set; }
+    public DateTime? CompletedDate { get; set; }
+    public string? Description { get; set; }
+    public string? DescriptionPersian { get; set; }
+    public string? Notes { get; set; }
+    public string? NotesPersian { get; set; }
+    public string? FailureReason { get; set; }
+    public string? FailureReasonPersian { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
+    public string CreatedBy { get; set; } = string.Empty;
+    public string UpdatedBy { get; set; } = string.Empty;
+}
+
+public class PaginatedPaymentResult
+{
+    public List<PaymentApiDto> Payments { get; set; } = new();
+    public int TotalCount { get; set; }
+    public int Page { get; set; }
+    public int PageSize { get; set; }
+    public int TotalPages => (int)Math.Ceiling((double)TotalCount / PageSize);
+}
+
+public class PaymentStatsDto
+{
+    public List<StatusStatDto> StatusStats { get; set; } = new();
+    public decimal TotalToday { get; set; }
+    public decimal TotalThisMonth { get; set; }
+    public decimal TotalAll { get; set; }
+}
+
+public class StatusStatDto
+{
+    public int Status { get; set; }
+    public int Count { get; set; }
 }
