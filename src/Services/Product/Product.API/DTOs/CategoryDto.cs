@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Product.API.DTOs;
 
 public class CategoryDto

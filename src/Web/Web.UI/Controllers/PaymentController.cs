@@ -441,7 +441,7 @@ public class PaymentController : Controller
                         CustomerPhone = order.PhoneNumber,
                         Items = order.OrderItems?.Select(item => new OrderItemViewModel
                         {
-                            ProductId = item.ProductId,
+                            ProductId = item.ProductId.GetHashCode(), // Convert Guid to int
                             ProductName = item.ProductName,
                             ProductNamePersian = item.ProductNamePersian,
                             Quantity = item.Quantity,

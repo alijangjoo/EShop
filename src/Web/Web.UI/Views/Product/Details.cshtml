@@ -1,3 +1,4 @@
+@using Web.UI.Models
 @model ProductViewModel
 @{
     ViewData["Title"] = $"{Model.NamePersian} - {Model.NameEnglish}";
@@ -143,11 +144,11 @@
                         <div class="table-responsive">
                             <table class="table table-striped">
                                 <tbody>
-                                    @foreach (var attribute in Model.Attributes)
+                                    @foreach (var attr in Model.Attributes)
                                     {
                                         <tr>
-                                            <td class="fw-bold">@attribute.Name</td>
-                                            <td>@attribute.Value</td>
+                                            <td class="fw-bold">@attr.Name</td>
+                                            <td>@attr.Value</td>
                                         </tr>
                                     }
                                 </tbody>
