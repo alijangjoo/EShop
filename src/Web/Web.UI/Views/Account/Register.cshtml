@@ -1,0 +1,255 @@
+@model RegisterViewModel
+@{
+    ViewData["Title"] = "ثبت نام / Register";
+}
+
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-success text-white text-center">
+                    <h3 class="card-title mb-0">@ViewData["Title"]</h3>
+                </div>
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-user-plus fa-3x text-success mb-3"></i>
+                        <p class="text-muted">حساب کاربری جدید ایجاد کنید</p>
+                    </div>
+
+                    @if (ViewData.ModelState.ErrorCount > 0)
+                    {
+                        <div class="alert alert-danger" role="alert">
+                            <h6 class="alert-heading">خطا در ثبت نام:</h6>
+                            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                            {
+                                <p class="mb-0">@error.ErrorMessage</p>
+                            }
+                        </div>
+                    }
+
+                    <form asp-action="Register" asp-controller="Account" method="post">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="FirstName" class="form-label">
+                                        <i class="fas fa-user me-2"></i>
+                                        نام / First Name
+                                    </label>
+                                    <input asp-for="FirstName" class="form-control form-control-lg" placeholder="نام خود را وارد کنید" />
+                                    <span asp-validation-for="FirstName" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="LastName" class="form-label">
+                                        <i class="fas fa-user me-2"></i>
+                                        نام خانوادگی / Last Name
+                                    </label>
+                                    <input asp-for="LastName" class="form-control form-control-lg" placeholder="نام خانوادگی خود را وارد کنید" />
+                                    <span asp-validation-for="LastName" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label">
+                                <i class="fas fa-envelope me-2"></i>
+                                ایمیل / Email
+                            </label>
+                            <input asp-for="Email" class="form-control form-control-lg" placeholder="example@domain.com" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>
+                                این ایمیل برای ورود به حساب کاربری استفاده خواهد شد
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Phone" class="form-label">
+                                <i class="fas fa-phone me-2"></i>
+                                شماره تلفن / Phone Number
+                            </label>
+                            <input asp-for="Phone" class="form-control form-control-lg" placeholder="09123456789" />
+                            <span asp-validation-for="Phone" class="text-danger"></span>
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>
+                                شماره تلفن برای ارسال پیام‌های اطلاع‌رسانی استفاده خواهد شد
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Password" class="form-label">
+                                <i class="fas fa-lock me-2"></i>
+                                رمز عبور / Password
+                            </label>
+                            <div class="input-group">
+                                <input asp-for="Password" class="form-control form-control-lg" type="password" placeholder="رمز عبور قوی انتخاب کنید" />
+                                <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('Password')">
+                                    <i class="fas fa-eye" id="togglePasswordIcon"></i>
+                                </button>
+                            </div>
+                            <span asp-validation-for="Password" class="text-danger"></span>
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>
+                                رمز عبور حداقل 8 کاراکتر، شامل حروف بزرگ، کوچک و عدد باشد
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="ConfirmPassword" class="form-label">
+                                <i class="fas fa-lock me-2"></i>
+                                تکرار رمز عبور / Confirm Password
+                            </label>
+                            <div class="input-group">
+                                <input asp-for="ConfirmPassword" class="form-control form-control-lg" type="password" placeholder="رمز عبور را مجدداً وارد کنید" />
+                                <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('ConfirmPassword')">
+                                    <i class="fas fa-eye" id="toggleConfirmPasswordIcon"></i>
+                                </button>
+                            </div>
+                            <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                        </div>
+
+                        <!-- Terms and Conditions -->
+                        <div class="mb-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="agreeTerms" required />
+                                <label class="form-check-label" for="agreeTerms">
+                                    با <a href="#" class="text-primary">قوانین و مقررات</a> و <a href="#" class="text-primary">حریم خصوصی</a> موافقم
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-user-plus me-2"></i>
+                                ثبت نام / Register
+                            </button>
+                        </div>
+                    </form>
+
+                    <hr class="my-4">
+
+                    <div class="text-center">
+                        <p class="mb-3">قبلاً حساب کاربری دارید؟</p>
+                        <a asp-action="Login" asp-controller="Account" class="btn btn-outline-primary">
+                            <i class="fas fa-sign-in-alt me-2"></i>
+                            ورود / Login
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Social Register Section -->
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h6 class="text-center mb-3">یا با شبکه‌های اجتماعی ثبت نام کنید</h6>
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-success" type="button">
+                            <i class="fab fa-google me-2"></i>
+                            ثبت نام با Google
+                        </button>
+                        <button class="btn btn-outline-primary" type="button">
+                            <i class="fab fa-telegram me-2"></i>
+                            ثبت نام با Telegram
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function togglePassword(fieldName) {
+        const passwordInput = document.querySelector(`input[name="${fieldName}"]`);
+        const toggleIcon = document.getElementById(`toggle${fieldName}Icon`);
+        
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            toggleIcon.classList.remove('fa-eye');
+            toggleIcon.classList.add('fa-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            toggleIcon.classList.remove('fa-eye-slash');
+            toggleIcon.classList.add('fa-eye');
+        }
+    }
+
+    // Password strength indicator
+    document.querySelector('input[name="Password"]').addEventListener('input', function() {
+        const password = this.value;
+        const strength = calculatePasswordStrength(password);
+        updatePasswordStrengthIndicator(strength);
+    });
+
+    function calculatePasswordStrength(password) {
+        let strength = 0;
+        
+        if (password.length >= 8) strength++;
+        if (/[a-z]/.test(password)) strength++;
+        if (/[A-Z]/.test(password)) strength++;
+        if (/\d/.test(password)) strength++;
+        if (/[^A-Za-z0-9]/.test(password)) strength++;
+        
+        return strength;
+    }
+
+    function updatePasswordStrengthIndicator(strength) {
+        const indicator = document.getElementById('passwordStrengthIndicator');
+        if (!indicator) return;
+        
+        const strengthTexts = ['خیلی ضعیف', 'ضعیف', 'متوسط', 'قوی', 'خیلی قوی'];
+        const strengthColors = ['danger', 'warning', 'info', 'success', 'success'];
+        
+        indicator.className = `badge bg-${strengthColors[strength - 1] || 'secondary'}`;
+        indicator.textContent = strengthTexts[strength - 1] || 'خیلی ضعیف';
+    }
+
+    // Phone number formatting
+    document.querySelector('input[name="Phone"]').addEventListener('input', function() {
+        let value = this.value.replace(/\D/g, '');
+        if (value.length > 11) {
+            value = value.substring(0, 11);
+        }
+        this.value = value;
+    });
+</script>
+
+<style>
+    .card {
+        border-radius: 15px;
+    }
+    
+    .card-header {
+        border-radius: 15px 15px 0 0 !important;
+    }
+    
+    .form-control:focus {
+        border-color: #28a745;
+        box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+    }
+    
+    .btn-outline-success:hover {
+        color: #fff;
+        background-color: #28a745;
+        border-color: #28a745;
+    }
+    
+    .form-text {
+        font-size: 0.875rem;
+        color: #6c757d;
+    }
+    
+    .input-group .btn {
+        border-right: none;
+    }
+    
+    .input-group .form-control {
+        border-left: none;
+    }
+    
+    .input-group .form-control:focus {
+        border-left: none;
+        box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+    }
+</style>
