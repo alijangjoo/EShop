@@ -1,0 +1,400 @@
+@model Web.UI.Models.PaymentVerifyViewModel
+@{
+    ViewBag.Title = "تایید پرداخت";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid py-4" dir="rtl">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header text-center">
+                    <h4 class="mb-0">
+                        <i class="fas fa-credit-card me-2"></i>
+                        نتیجه تایید پرداخت
+                    </h4>
+                </div>
+                <div class="card-body">
+                    @if (Model.IsSuccess)
+                    {
+                        <div class="alert alert-success text-center">
+                            <div class="mb-3">
+                                <i class="fas fa-check-circle" style="font-size: 4rem; color: #28a745;"></i>
+                            </div>
+                            <h5 class="alert-heading">پرداخت موفق!</h5>
+                            <p class="mb-0">
+                                @(!string.IsNullOrEmpty(Model.MessagePersian) ? Model.MessagePersian : Model.Message)
+                            </p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-danger text-center">
+                            <div class="mb-3">
+                                <i class="fas fa-times-circle" style="font-size: 4rem; color: #dc3545;"></i>
+                            </div>
+                            <h5 class="alert-heading">پرداخت ناموفق!</h5>
+                            <p class="mb-0">
+                                @(!string.IsNullOrEmpty(Model.MessagePersian) ? Model.MessagePersian : Model.Message)
+                            </p>
+                        </div>
+                    }
+
+                    <!-- Payment Details -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="border-bottom pb-2 mb-3">
+                                <i class="fas fa-info-circle me-2"></i>
+                                اطلاعات پرداخت
+                            </h6>
+                            <div class="mb-2">
+                                <strong>شماره پرداخت:</strong>
+                                <span class="text-muted">@Model.PaymentNumber</span>
+                            </div>
+                            <div class="mb-2">
+                                <strong>شماره تراکنش:</strong>
+                                <span class="text-muted">@Model.TransactionId</span>
+                            </div>
+                        </div>
+
+                        @if (Model.Payment != null)
+                        {
+                            <div class="col-md-6">
+                                <h6 class="border-bottom pb-2 mb-3">
+                                    <i class="fas fa-receipt me-2"></i>
+                                    جزئیات پرداخت
+                                </h6>
+                                <div class="mb-2">
+                                    <strong>مبلغ:</strong>
+                                    <span class="text-primary">@Model.Payment.Amount.ToString("N0") تومان</span>
+                                </div>
+                                <div class="mb-2">
+                                    <strong>روش پرداخت:</strong>
+                                    <span class="text-muted">@Model.Payment.PaymentMethodText</span>
+                                </div>
+                                <div class="mb-2">
+                                    <strong>وضعیت:</strong>
+                                    <span class="badge bg-@Model.Payment.StatusClass">@Model.Payment.StatusText</span>
+                                </div>
+                                <div class="mb-2">
+                                    <strong>تاریخ پرداخت:</strong>
+                                    <span class="text-muted">@Model.Payment.PaymentDate.ToString("yyyy/MM/dd HH:mm")</span>
+                                </div>
+                                
+                                @if (Model.IsSuccess && Model.Payment.Status == Web.UI.Models.PaymentStatusEnum.Completed)
+                                {
+                                    @if (!string.IsNullOrEmpty(Model.Payment.ReferenceNumber))
+                                    {
+                                        <div class="mb-2">
+                                            <strong>شماره مرجع:</strong>
+                                            <span class="text-muted">@Model.Payment.ReferenceNumber</span>
+                                        </div>
+                                    }
+                                    
+                                    @if (!string.IsNullOrEmpty(Model.Payment.BankNamePersian))
+                                    {
+                                        <div class="mb-2">
+                                            <strong>بانک:</strong>
+                                            <span class="text-muted">@Model.Payment.BankNamePersian</span>
+                                        </div>
+                                    }
+                                    
+                                    @if (!string.IsNullOrEmpty(Model.Payment.CardLastFourDigits))
+                                    {
+                                        <div class="mb-2">
+                                            <strong>کارت:</strong>
+                                            <span class="text-muted">****@Model.Payment.CardLastFourDigits</span>
+                                        </div>
+                                    }
+                                    
+                                    @if (Model.Payment.CompletedDate.HasValue)
+                                    {
+                                        <div class="mb-2">
+                                            <strong>تاریخ تایید:</strong>
+                                            <span class="text-muted">@Model.Payment.CompletedDate.Value.ToString("yyyy/MM/dd HH:mm")</span>
+                                        </div>
+                                    }
+                                }
+                                else if (!Model.IsSuccess)
+                                {
+                                    @if (!string.IsNullOrEmpty(Model.Payment.FailureReasonPersian))
+                                    {
+                                        <div class="mb-2">
+                                            <strong>دلیل خطا:</strong>
+                                            <span class="text-danger">@Model.Payment.FailureReasonPersian</span>
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Customer Information -->
+                    @if (Model.Payment != null && Model.IsSuccess)
+                    {
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <h6 class="border-bottom pb-2 mb-3">
+                                    <i class="fas fa-user me-2"></i>
+                                    اطلاعات مشتری
+                                </h6>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="mb-2">
+                                            <strong>نام:</strong>
+                                            <span class="text-muted">@Model.Payment.CustomerName</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-2">
+                                            <strong>ایمیل:</strong>
+                                            <span class="text-muted">@Model.Payment.CustomerEmail</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-2">
+                                            <strong>تلفن:</strong>
+                                            <span class="text-muted">@Model.Payment.CustomerPhone</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Action Buttons -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                                @if (Model.IsSuccess && Model.Payment != null)
+                                {
+                                    <a href="@Url.Action("Details", "Payment", new { id = Model.Payment.Id })" class="btn btn-primary">
+                                        <i class="fas fa-eye me-2"></i>
+                                        مشاهده جزئیات پرداخت
+                                    </a>
+                                    <a href="@Url.Action("Index", "Order")" class="btn btn-success">
+                                        <i class="fas fa-shopping-cart me-2"></i>
+                                        مشاهده سفارشات
+                                    </a>
+                                }
+                                else
+                                {
+                                    <a href="@Url.Action("Create", "Payment", new { orderId = Model.Payment?.OrderId })" class="btn btn-warning">
+                                        <i class="fas fa-redo me-2"></i>
+                                        تلاش مجدد
+                                    </a>
+                                }
+                                
+                                <a href="@Url.Action("Index", "Home")" class="btn btn-secondary">
+                                    <i class="fas fa-home me-2"></i>
+                                    صفحه اصلی
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Success Message for Printing -->
+                    @if (Model.IsSuccess && Model.Payment != null)
+                    {
+                        <div class="mt-4 text-center d-print-block">
+                            <div class="alert alert-info">
+                                <i class="fas fa-print me-2"></i>
+                                برای چاپ رسید، دکمه
+                                <button onclick="window.print()" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-print me-1"></i>
+                                    چاپ
+                                </button>
+                                را کلیک کنید.
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Auto-refresh for pending payments
+            @if (Model.Payment != null && Model.Payment.Status == Web.UI.Models.PaymentStatusEnum.Processing)
+            {
+                <text>
+                setTimeout(function () {
+                    location.reload();
+                }, 30000); // Refresh every 30 seconds for processing payments
+                </text>
+            }
+
+            // Persian number display
+            $('.text-muted, .text-primary').each(function () {
+                var text = $(this).text();
+                var persianNumbers = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+                var englishNumbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+                
+                for (var i = 0; i < englishNumbers.length; i++) {
+                    text = text.replace(new RegExp(englishNumbers[i], 'g'), persianNumbers[i]);
+                }
+                
+                $(this).text(text);
+            });
+        });
+    </script>
+}
+
+@section Styles {
+    <style>
+        .card {
+            border: none;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom: none;
+        }
+
+        .alert {
+            border-radius: 15px;
+            border: none;
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+
+        .alert-danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            color: white;
+        }
+
+        .alert-info {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .badge {
+            font-size: 0.875rem;
+            padding: 0.5rem 0.75rem;
+        }
+
+        .bg-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%) !important;
+        }
+
+        .bg-warning {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%) !important;
+        }
+
+        .bg-info {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        }
+
+        .bg-danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%) !important;
+        }
+
+        .bg-secondary {
+            background: linear-gradient(135deg, #b3b3b3 0%, #808080 100%) !important;
+        }
+
+        .bg-dark {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%) !important;
+        }
+
+        .btn {
+            border-radius: 25px;
+            padding: 0.5rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            border: none;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border: none;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #b3b3b3 0%, #808080 100%);
+            border: none;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .border-bottom {
+            border-bottom: 2px solid #dee2e6 !important;
+        }
+
+        .text-primary {
+            color: #667eea !important;
+        }
+
+        h6 {
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        strong {
+            color: #34495e;
+        }
+
+        /* Print Styles */
+        @media print {
+            .btn, .alert-info {
+                display: none !important;
+            }
+            
+            .card {
+                box-shadow: none;
+                border: 1px solid #dee2e6;
+            }
+            
+            .card-header {
+                background: #f8f9fa !important;
+                color: #000 !important;
+            }
+            
+            .alert-success, .alert-danger {
+                background: #f8f9fa !important;
+                color: #000 !important;
+                border: 1px solid #dee2e6 !important;
+            }
+            
+            .badge {
+                background: #f8f9fa !important;
+                color: #000 !important;
+                border: 1px solid #dee2e6 !important;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container-fluid {
+                padding: 1rem;
+            }
+            
+            .card-body {
+                padding: 1rem;
+            }
+            
+            .btn {
+                margin-bottom: 0.5rem;
+            }
+        }
+    </style>
+}

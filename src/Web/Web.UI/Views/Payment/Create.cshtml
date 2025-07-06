@@ -1,0 +1,356 @@
+@model Web.UI.Models.CreatePaymentViewModel
+@{
+    ViewBag.Title = "پرداخت سفارش";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid py-4" dir="rtl">
+    <div class="row">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-header pb-3">
+                    <h4 class="mb-0">
+                        <i class="fas fa-credit-card me-2"></i>
+                        پرداخت سفارش
+                    </h4>
+                </div>
+                <div class="card-body">
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            @TempData["Error"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    <div class="row">
+                        <!-- Order Summary -->
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-shopping-cart me-2"></i>
+                                        خلاصه سفارش
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <strong>شماره سفارش:</strong> @Model.OrderNumber
+                                    </div>
+                                    
+                                    @if (Model.OrderItems.Any())
+                                    {
+                                        <div class="table-responsive">
+                                            <table class="table table-sm">
+                                                <thead>
+                                                    <tr>
+                                                        <th>محصول</th>
+                                                        <th>تعداد</th>
+                                                        <th>قیمت</th>
+                                                        <th>جمع</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var item in Model.OrderItems)
+                                                    {
+                                                        <tr>
+                                                            <td>
+                                                                <div class="d-flex align-items-center">
+                                                                    @if (!string.IsNullOrEmpty(item.ImageUrl))
+                                                                    {
+                                                                        <img src="@item.ImageUrl" alt="@item.ProductNamePersian" class="img-thumbnail me-2" style="width: 40px; height: 40px;">
+                                                                    }
+                                                                    <span>@(!string.IsNullOrEmpty(item.ProductNamePersian) ? item.ProductNamePersian : item.ProductName)</span>
+                                                                </div>
+                                                            </td>
+                                                            <td>@item.Quantity</td>
+                                                            <td>@item.Price.ToString("N0") تومان</td>
+                                                            <td>@item.Total.ToString("N0") تومان</td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    }
+                                    
+                                    <div class="border-top pt-3">
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <strong>مجموع کل:</strong>
+                                            </div>
+                                            <div class="col-6 text-end">
+                                                <strong class="text-primary">@Model.OrderTotal.ToString("N0") تومان</strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Payment Form -->
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-credit-card me-2"></i>
+                                        اطلاعات پرداخت
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <form asp-action="Create" method="post">
+                                        <input type="hidden" asp-for="OrderId" />
+                                        <input type="hidden" asp-for="Amount" />
+                                        <input type="hidden" asp-for="OrderNumber" />
+                                        <input type="hidden" asp-for="OrderTotal" />
+
+                                        <!-- Payment Method Selection -->
+                                        <div class="mb-3">
+                                            <label class="form-label required">روش پرداخت</label>
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="radio" asp-for="PaymentMethod" value="1" id="paymentMethodIPG" checked>
+                                                        <label class="form-check-label" for="paymentMethodIPG">
+                                                            <i class="fas fa-credit-card me-2"></i>
+                                                            درگاه پرداخت
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="radio" asp-for="PaymentMethod" value="2" id="paymentMethodCash">
+                                                        <label class="form-check-label" for="paymentMethodCash">
+                                                            <i class="fas fa-money-bill-wave me-2"></i>
+                                                            پرداخت نقدی
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <span asp-validation-for="PaymentMethod" class="text-danger"></span>
+                                        </div>
+
+                                        <!-- Customer Information -->
+                                        <div class="mb-3">
+                                            <label asp-for="CustomerName" class="form-label required">نام و نام خانوادگی</label>
+                                            <input asp-for="CustomerName" class="form-control" placeholder="نام و نام خانوادگی خود را وارد کنید">
+                                            <span asp-validation-for="CustomerName" class="text-danger"></span>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label asp-for="CustomerEmail" class="form-label required">آدرس ایمیل</label>
+                                            <input asp-for="CustomerEmail" class="form-control" placeholder="example@email.com">
+                                            <span asp-validation-for="CustomerEmail" class="text-danger"></span>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label asp-for="CustomerPhone" class="form-label required">شماره تلفن</label>
+                                            <input asp-for="CustomerPhone" class="form-control" placeholder="09123456789">
+                                            <span asp-validation-for="CustomerPhone" class="text-danger"></span>
+                                        </div>
+
+                                        <!-- IPG Payment Details -->
+                                        <div id="ipgPaymentDetails" class="payment-details">
+                                            <div class="alert alert-info">
+                                                <i class="fas fa-info-circle me-2"></i>
+                                                با انتخاب درگاه پرداخت، به صفحه بانک هدایت خواهید شد.
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label asp-for="CardName" class="form-label">نام روی کارت</label>
+                                                <input asp-for="CardName" class="form-control" placeholder="نام روی کارت">
+                                                <span asp-validation-for="CardName" class="text-danger"></span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Cash Payment Details -->
+                                        <div id="cashPaymentDetails" class="payment-details" style="display: none;">
+                                            <div class="alert alert-warning">
+                                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                                <strong>پرداخت نقدی هنگام تحویل</strong>
+                                                <br>
+                                                با انتخاب این روش، مبلغ سفارش را هنگام تحویل کالا پرداخت خواهید کرد.
+                                            </div>
+                                        </div>
+
+                                        <!-- Additional Notes -->
+                                        <div class="mb-3">
+                                            <label asp-for="NotesPersian" class="form-label">توضیحات اضافی</label>
+                                            <textarea asp-for="NotesPersian" class="form-control" rows="3" placeholder="توضیحات اضافی در صورت نیاز"></textarea>
+                                            <span asp-validation-for="NotesPersian" class="text-danger"></span>
+                                        </div>
+
+                                        <!-- Submit Buttons -->
+                                        <div class="d-grid gap-2">
+                                            <button type="submit" class="btn btn-primary btn-lg">
+                                                <i class="fas fa-credit-card me-2"></i>
+                                                <span id="submitButtonText">پرداخت @Model.Amount.ToString("N0") تومان</span>
+                                            </button>
+                                            <a href="@Url.Action("Index", "Order")" class="btn btn-secondary">
+                                                <i class="fas fa-arrow-left me-2"></i>
+                                                بازگشت به سفارشات
+                                            </a>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Handle payment method change
+            $('input[name="PaymentMethod"]').change(function () {
+                var selectedMethod = $(this).val();
+                var submitButton = $('#submitButtonText');
+                
+                if (selectedMethod == '1') { // IPG
+                    $('#ipgPaymentDetails').show();
+                    $('#cashPaymentDetails').hide();
+                    submitButton.html('<i class="fas fa-credit-card me-2"></i>پرداخت @Model.Amount.ToString("N0") تومان');
+                } else if (selectedMethod == '2') { // Cash
+                    $('#ipgPaymentDetails').hide();
+                    $('#cashPaymentDetails').show();
+                    submitButton.html('<i class="fas fa-check me-2"></i>ثبت سفارش');
+                }
+            });
+
+            // Form validation
+            $('form').submit(function (e) {
+                var isValid = true;
+                var paymentMethod = $('input[name="PaymentMethod"]:checked').val();
+
+                // Basic validation
+                if (!$('#CustomerName').val().trim()) {
+                    isValid = false;
+                    $('#CustomerName').addClass('is-invalid');
+                } else {
+                    $('#CustomerName').removeClass('is-invalid');
+                }
+
+                if (!$('#CustomerEmail').val().trim()) {
+                    isValid = false;
+                    $('#CustomerEmail').addClass('is-invalid');
+                } else {
+                    $('#CustomerEmail').removeClass('is-invalid');
+                }
+
+                if (!$('#CustomerPhone').val().trim()) {
+                    isValid = false;
+                    $('#CustomerPhone').addClass('is-invalid');
+                } else {
+                    $('#CustomerPhone').removeClass('is-invalid');
+                }
+
+                if (!isValid) {
+                    e.preventDefault();
+                    return false;
+                }
+
+                // Show loading state
+                $(this).find('button[type="submit"]').prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>در حال پردازش...');
+            });
+
+            // Persian number input
+            $('.form-control').on('keypress', function (e) {
+                // Allow Persian numbers but convert to English
+                var persianNumbers = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+                var englishNumbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+                var inputChar = String.fromCharCode(e.which);
+                var persianIndex = persianNumbers.indexOf(inputChar);
+                
+                if (persianIndex !== -1) {
+                    e.preventDefault();
+                    var currentValue = $(this).val();
+                    var caretPos = this.selectionStart;
+                    var newValue = currentValue.substring(0, caretPos) + englishNumbers[persianIndex] + currentValue.substring(caretPos);
+                    $(this).val(newValue);
+                    this.setSelectionRange(caretPos + 1, caretPos + 1);
+                }
+            });
+        });
+    </script>
+}
+
+@section Styles {
+    <style>
+        .required::after {
+            content: " *";
+            color: red;
+        }
+
+        .payment-details {
+            border: 1px solid #dee2e6;
+            border-radius: 0.375rem;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .form-check-input:checked {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+
+        .card-header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .text-primary {
+            color: #0d6efd !important;
+        }
+
+        .btn-primary {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+            border-color: #0a58ca;
+        }
+
+        .img-thumbnail {
+            border-radius: 0.375rem;
+        }
+
+        .table th {
+            border-top: none;
+            font-weight: 600;
+        }
+
+        .alert {
+            border-radius: 0.375rem;
+        }
+
+        .form-control:focus {
+            border-color: #86b7fe;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+
+        .is-invalid {
+            border-color: #dc3545;
+        }
+
+        .is-invalid:focus {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+        }
+
+        @media (max-width: 768px) {
+            .container-fluid {
+                padding: 1rem;
+            }
+            
+            .card {
+                margin-bottom: 1rem;
+            }
+        }
+    </style>
+}
