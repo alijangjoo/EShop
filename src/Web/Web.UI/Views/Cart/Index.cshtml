@@ -1,0 +1,317 @@
+@model CartViewModel
+@{
+    ViewData["Title"] = "سبد خرید / Shopping Cart";
+}
+
+<div class="container-fluid px-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">@ViewData["Title"]</h1>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">خانه</a></li>
+                        <li class="breadcrumb-item active">سبد خرید</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.Items.Any())
+    {
+        <div class="row">
+            <!-- Cart Items -->
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-shopping-cart me-2"></i>
+                            کالاهای سبد خرید (@Model.TotalItems آیتم)
+                        </h5>
+                        <form asp-action="ClearCart" asp-controller="Cart" method="post" style="display: inline;">
+                            <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('آیا از پاک کردن سبد خرید مطمئن هستید؟')">
+                                <i class="fas fa-trash me-1"></i>
+                                پاک کردن سبد
+                            </button>
+                        </form>
+                    </div>
+                    <div class="card-body p-0">
+                        @foreach (var item in Model.Items)
+                        {
+                            <div class="cart-item border-bottom">
+                                <div class="row g-0 align-items-center">
+                                    <div class="col-md-2 col-3">
+                                        <div class="product-image-container">
+                                            @if (!string.IsNullOrEmpty(item.ProductImage))
+                                            {
+                                                <img src="@item.ProductImage" alt="@item.ProductName" class="img-fluid rounded" style="width: 100%; height: 100px; object-fit: cover;">
+                                            }
+                                            else
+                                            {
+                                                <div class="bg-light d-flex align-items-center justify-content-center rounded" style="width: 100%; height: 100px;">
+                                                    <i class="fas fa-image fa-2x text-muted"></i>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 col-9">
+                                        <div class="product-info p-3">
+                                            <h6 class="mb-2">@item.ProductName</h6>
+                                            <p class="text-muted small mb-1">قیمت واحد: @item.Price.ToString("N0") تومان</p>
+                                            <p class="text-muted small mb-0">موجود در انبار</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 col-6">
+                                        <div class="quantity-controls p-3">
+                                            <label class="form-label small">تعداد:</label>
+                                            <div class="input-group input-group-sm">
+                                                <button type="button" class="btn btn-outline-secondary" onclick="updateQuantity(@item.ProductId, @item.Quantity - 1)">
+                                                    <i class="fas fa-minus"></i>
+                                                </button>
+                                                <input type="number" class="form-control text-center" value="@item.Quantity" min="1" readonly>
+                                                <button type="button" class="btn btn-outline-secondary" onclick="updateQuantity(@item.ProductId, @item.Quantity + 1)">
+                                                    <i class="fas fa-plus"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2 col-6">
+                                        <div class="price-actions p-3 text-end">
+                                            <div class="fw-bold text-primary mb-2">@item.TotalPrice.ToString("N0") تومان</div>
+                                            <form asp-action="RemoveFromCart" asp-controller="Cart" method="post" style="display: inline;">
+                                                <input type="hidden" name="productId" value="@item.ProductId" />
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="حذف از سبد">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Continue Shopping -->
+                <div class="card mt-4">
+                    <div class="card-body text-center">
+                        <a href="@Url.Action("Index", "Product")" class="btn btn-outline-primary">
+                            <i class="fas fa-arrow-left me-2"></i>
+                            ادامه خرید
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cart Summary -->
+            <div class="col-lg-4">
+                <div class="card cart-summary">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-calculator me-2"></i>
+                            خلاصه سبد خرید
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="summary-item d-flex justify-content-between mb-3">
+                            <span>تعداد کالا:</span>
+                            <span>@Model.TotalItems آیتم</span>
+                        </div>
+                        <div class="summary-item d-flex justify-content-between mb-3">
+                            <span>جمع کل:</span>
+                            <span class="fw-bold">@Model.TotalPrice.ToString("N0") تومان</span>
+                        </div>
+                        <div class="summary-item d-flex justify-content-between mb-3">
+                            <span>هزینه ارسال:</span>
+                            <span class="text-success">رایگان</span>
+                        </div>
+                        <hr>
+                        <div class="summary-item d-flex justify-content-between mb-4">
+                            <span class="h6">مبلغ قابل پرداخت:</span>
+                            <span class="h5 text-primary fw-bold">@Model.TotalPrice.ToString("N0") تومان</span>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <a href="@Url.Action("Checkout", "Cart")" class="btn btn-primary btn-lg">
+                                <i class="fas fa-credit-card me-2"></i>
+                                تسویه حساب
+                            </a>
+                            <a href="@Url.Action("Index", "Product")" class="btn btn-outline-secondary">
+                                <i class="fas fa-shopping-cart me-2"></i>
+                                ادامه خرید
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Shipping Info -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h6 class="card-title mb-0">
+                            <i class="fas fa-truck me-2"></i>
+                            اطلاعات ارسال
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="shipping-info">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                                <span class="small">ارسال رایگان برای خریدهای بالای 500,000 تومان</span>
+                            </div>
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-clock text-primary me-2"></i>
+                                <span class="small">تحویل در کمتر از 24 ساعت</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-shield-alt text-warning me-2"></i>
+                                <span class="small">ضمانت بازگشت 7 روزه</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Coupon Code -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h6 class="card-title mb-0">
+                            <i class="fas fa-tag me-2"></i>
+                            کد تخفیف
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="کد تخفیف را وارد کنید">
+                            <button class="btn btn-outline-primary" type="button">
+                                اعمال
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Empty Cart -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body text-center py-5">
+                        <i class="fas fa-shopping-cart fa-5x text-muted mb-4"></i>
+                        <h3 class="mb-3">سبد خرید شما خالی است</h3>
+                        <p class="text-muted mb-4">هنوز محصولی به سبد خرید اضافه نکرده‌اید</p>
+                        <a href="@Url.Action("Index", "Product")" class="btn btn-primary btn-lg">
+                            <i class="fas fa-shopping-bag me-2"></i>
+                            شروع خرید
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<script>
+    function updateQuantity(productId, newQuantity) {
+        if (newQuantity < 1) {
+            if (confirm('آیا از حذف این محصول مطمئن هستید؟')) {
+                removeFromCart(productId);
+            }
+            return;
+        }
+        
+        fetch('@Url.Action("UpdateQuantity", "Cart")', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+            },
+            body: `productId=${productId}&quantity=${newQuantity}`
+        })
+        .then(response => {
+            if (response.ok) {
+                location.reload();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast('خطا در به‌روزرسانی سبد خرید', 'error');
+        });
+    }
+    
+    function removeFromCart(productId) {
+        fetch('@Url.Action("RemoveFromCart", "Cart")', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+            },
+            body: `productId=${productId}`
+        })
+        .then(response => {
+            if (response.ok) {
+                location.reload();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast('خطا در حذف محصول', 'error');
+        });
+    }
+</script>
+
+<style>
+    .cart-item {
+        transition: all 0.3s ease;
+    }
+    
+    .cart-item:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .cart-summary {
+        position: sticky;
+        top: 20px;
+    }
+    
+    .summary-item {
+        font-size: 0.95rem;
+    }
+    
+    .shipping-info .small {
+        font-size: 0.85rem;
+    }
+    
+    .product-image-container {
+        padding: 1rem;
+    }
+    
+    .quantity-controls .input-group-sm .form-control {
+        width: 60px;
+    }
+    
+    .quantity-controls .btn {
+        width: 30px;
+        height: 30px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .card {
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+    
+    .btn-primary:hover {
+        background-color: #0056b3;
+        border-color: #0056b3;
+    }
+</style>
