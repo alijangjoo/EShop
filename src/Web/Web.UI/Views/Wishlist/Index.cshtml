@@ -1,0 +1,346 @@
+@model WishlistViewModel
+@{
+    ViewData["Title"] = "لیست علاقه‌مندی";
+}
+
+<div class="wishlist-page">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="page-header">
+                    <h1 class="page-title">
+                        <i class="fas fa-heart text-danger"></i>
+                        لیست علاقه‌مندی شما
+                    </h1>
+                    <p class="page-description">محصولات مورد علاقه‌تان را مدیریت کنید</p>
+                </div>
+            </div>
+        </div>
+
+        @if (Model.IsEmpty)
+        {
+            <div class="row">
+                <div class="col-12">
+                    <div class="empty-wishlist text-center">
+                        <div class="empty-icon">
+                            <i class="fas fa-heart-broken"></i>
+                        </div>
+                        <h3>لیست علاقه‌مندی شما خالی است</h3>
+                        <p class="text-muted">محصولات مورد علاقه‌تان را به این لیست اضافه کنید</p>
+                        <a href="@Url.Action("Index", "Product")" class="btn btn-primary">
+                            <i class="fas fa-shopping-bag"></i>
+                            شروع خرید
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="wishlist-items">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5>محصولات (@Model.TotalItems مورد)</h5>
+                            <div class="wishlist-actions">
+                                <button class="btn btn-outline-secondary btn-sm" onclick="shareWishlist()">
+                                    <i class="fas fa-share"></i>
+                                    اشتراک‌گذاری
+                                </button>
+                                <button class="btn btn-outline-danger btn-sm" onclick="clearWishlist()">
+                                    <i class="fas fa-trash"></i>
+                                    پاک کردن همه
+                                </button>
+                            </div>
+                        </div>
+
+                        @foreach (var item in Model.Items)
+                        {
+                            <div class="wishlist-item" data-product-id="@item.ProductId">
+                                <div class="card mb-3">
+                                    <div class="row g-0">
+                                        <div class="col-md-3">
+                                            <img src="@item.ImageUrl" class="img-fluid rounded-start wishlist-image" alt="@item.ProductName">
+                                        </div>
+                                        <div class="col-md-9">
+                                            <div class="card-body">
+                                                <div class="d-flex justify-content-between">
+                                                    <div class="product-info">
+                                                        <h5 class="card-title">
+                                                            <a href="@item.ProductUrl">@item.ProductName</a>
+                                                        </h5>
+                                                        <p class="card-text">
+                                                            <span class="price">@item.FormattedPrice</span>
+                                                        </p>
+                                                        <p class="card-text">
+                                                            <small class="text-muted">
+                                                                <i class="fas fa-clock"></i>
+                                                                اضافه شده در @item.FormattedDate
+                                                            </small>
+                                                        </p>
+                                                        <div class="stock-status">
+                                                            @if (item.IsInStock)
+                                                            {
+                                                                <span class="badge bg-success">موجود</span>
+                                                            }
+                                                            else
+                                                            {
+                                                                <span class="badge bg-danger">ناموجود</span>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                    <div class="item-actions">
+                                                        <button class="btn btn-outline-danger btn-sm" onclick="removeFromWishlist(@item.ProductId)">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div class="mt-3">
+                                                    @if (item.IsInStock)
+                                                    {
+                                                        <button class="btn btn-primary btn-sm" onclick="moveToCart(@item.ProductId)">
+                                                            <i class="fas fa-shopping-cart"></i>
+                                                            انتقال به سبد خرید
+                                                        </button>
+                                                    }
+                                                    else
+                                                    {
+                                                        <button class="btn btn-secondary btn-sm" disabled>
+                                                            <i class="fas fa-bell"></i>
+                                                            اطلاع رسانی موجودی
+                                                        </button>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="wishlist-sidebar">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title">خلاصه لیست</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="wishlist-summary">
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span>تعداد محصولات:</span>
+                                        <span>@Model.TotalItems مورد</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span>محصولات موجود:</span>
+                                        <span>@Model.Items.Count(x => x.IsInStock) مورد</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-3">
+                                        <span>ارزش کل:</span>
+                                        <span class="fw-bold">@Model.Items.Sum(x => x.Price).ToString("N0") تومان</span>
+                                    </div>
+                                    <hr>
+                                    <div class="d-grid gap-2">
+                                        <button class="btn btn-primary" onclick="addAllToCart()">
+                                            <i class="fas fa-cart-plus"></i>
+                                            افزودن همه به سبد خرید
+                                        </button>
+                                        <button class="btn btn-outline-secondary" onclick="shareWishlist()">
+                                            <i class="fas fa-share"></i>
+                                            اشتراک‌گذاری لیست
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card mt-3">
+                            <div class="card-header">
+                                <h5 class="card-title">تبدیل به لیست هدیه</h5>
+                            </div>
+                            <div class="card-body">
+                                <p class="card-text">لیست علاقه‌مندی‌تان را به یک لیست هدیه تبدیل کنید</p>
+                                <button class="btn btn-success btn-sm" onclick="createGiftRegistry()">
+                                    <i class="fas fa-gift"></i>
+                                    ایجاد لیست هدیه
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+.wishlist-page {
+    padding: 30px 0;
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.page-title {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.page-description {
+    color: #666;
+    font-size: 1.1rem;
+}
+
+.empty-wishlist {
+    padding: 80px 20px;
+}
+
+.empty-icon {
+    font-size: 5rem;
+    color: #ddd;
+    margin-bottom: 30px;
+}
+
+.wishlist-item {
+    transition: transform 0.2s;
+}
+
+.wishlist-item:hover {
+    transform: translateY(-2px);
+}
+
+.wishlist-image {
+    height: 150px;
+    object-fit: cover;
+}
+
+.price {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #007bff;
+}
+
+.item-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.wishlist-sidebar .card {
+    border: none;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.wishlist-actions {
+    display: flex;
+    gap: 10px;
+}
+
+@media (max-width: 768px) {
+    .wishlist-actions {
+        flex-direction: column;
+    }
+    
+    .page-title {
+        font-size: 2rem;
+    }
+}
+</style>
+
+<script>
+function removeFromWishlist(productId) {
+    if (confirm('آیا از حذف این محصول از لیست علاقه‌مندی مطمئن هستید؟')) {
+        $.post('@Url.Action("RemoveFromWishlist", "Wishlist")', { productId: productId })
+            .done(function(response) {
+                if (response.success) {
+                    showToast('success', response.message);
+                    $(`.wishlist-item[data-product-id="${productId}"]`).fadeOut(300, function() {
+                        $(this).remove();
+                        if ($('.wishlist-item').length === 0) {
+                            location.reload();
+                        }
+                    });
+                } else {
+                    showToast('error', response.message);
+                }
+            });
+    }
+}
+
+function moveToCart(productId) {
+    $.post('@Url.Action("MoveToCart", "Wishlist")', { productId: productId })
+        .done(function(response) {
+            if (response.success) {
+                showToast('success', response.message);
+                $(`.wishlist-item[data-product-id="${productId}"]`).fadeOut(300, function() {
+                    $(this).remove();
+                });
+                updateCartCount();
+            } else {
+                showToast('error', response.message);
+            }
+        });
+}
+
+function addAllToCart() {
+    const availableItems = $('.wishlist-item').filter(function() {
+        return $(this).find('.badge.bg-success').length > 0;
+    });
+    
+    if (availableItems.length === 0) {
+        showToast('warning', 'هیچ محصول موجودی برای افزودن به سبد خرید وجود ندارد');
+        return;
+    }
+    
+    let processed = 0;
+    const total = availableItems.length;
+    
+    availableItems.each(function() {
+        const productId = $(this).data('product-id');
+        moveToCart(productId);
+    });
+}
+
+function shareWishlist() {
+    $.post('@Url.Action("ShareWishlist", "Wishlist")')
+        .done(function(response) {
+            if (response.success) {
+                navigator.clipboard.writeText(response.shareUrl).then(function() {
+                    showToast('success', 'لینک اشتراک‌گذاری در کلیپ‌بورد کپی شد');
+                }).catch(function() {
+                    prompt('لینک اشتراک‌گذاری:', response.shareUrl);
+                });
+            } else {
+                showToast('error', response.message);
+            }
+        });
+}
+
+function clearWishlist() {
+    if (confirm('آیا از پاک کردن تمام محصولات لیست علاقه‌مندی مطمئن هستید؟')) {
+        // This would need to be implemented in the controller
+        showToast('info', 'این قابلیت به زودی اضافه خواهد شد');
+    }
+}
+
+function createGiftRegistry() {
+    window.location.href = '@Url.Action("Create", "GiftRegistry")';
+}
+
+function updateCartCount() {
+    $.get('@Url.Action("GetCartCount", "Cart")')
+        .done(function(response) {
+            $('#cart-count').text(response.count);
+        });
+}
+
+function showToast(type, message) {
+    // This would use a toast notification library
+    alert(message);
+}
+</script>

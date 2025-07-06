@@ -22,6 +22,9 @@ builder.Services.AddHttpContextAccessor();
 // Register custom services
 builder.Services.AddScoped<IApiService, ApiService>();
 builder.Services.AddScoped<ICartService, CartService>();
+builder.Services.AddScoped<IWishlistService, WishlistService>();
+builder.Services.AddScoped<IOrderTrackingService, OrderTrackingService>();
+builder.Services.AddScoped<IPromotionService, PromotionService>();
 
 // Add authentication for JWT tokens
 builder.Services.AddAuthentication("Bearer")
