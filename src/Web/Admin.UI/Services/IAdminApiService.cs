@@ -184,7 +184,7 @@ public class AdminApiService : IAdminApiService
                 queryParams.Add($"sortBy={sortBy}");
 
             var query = string.Join("&", queryParams);
-            var response = await _httpClient.GetAsync($"{_configuration["ApiSettings:ProductApi"]}/api/product?{query}");
+            var response = await _httpClient.GetAsync($"{_configuration["ApiSettings:BaseUrl"]}/api/product?{query}");
             
             if (response.IsSuccessStatusCode)
             {
@@ -224,7 +224,7 @@ public class AdminApiService : IAdminApiService
         {
             SetAuthorizationHeader();
             
-            var response = await _httpClient.GetAsync($"{_configuration["ApiSettings:ProductApi"]}/api/product/{id}");
+            var response = await _httpClient.GetAsync($"{_configuration["ApiSettings:BaseUrl"]}/api/product/{id}");
             
             if (response.IsSuccessStatusCode)
             {
@@ -722,7 +722,7 @@ public class AdminApiService : IAdminApiService
             var json = System.Text.Json.JsonSerializer.Serialize(model);
             var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
             
-            var response = await _httpClient.PostAsync($"{_configuration["ApiSettings:IdentityApi"]}/api/auth/admin-login", content);
+            var response = await _httpClient.PostAsync($"{_configuration["ApiSettings:BaseUrl"]}/api/auth/admin-login", content);
             
             if (response.IsSuccessStatusCode)
             {

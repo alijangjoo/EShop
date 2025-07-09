@@ -124,6 +124,49 @@ public class AuthController : ControllerBase
         }
     }
 
+    [HttpPost("admin-login")]
+    public async Task<IActionResult> AdminLogin([FromBody] UserLoginDto model)
+    {
+        try
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+                return Unauthorized("Invalid credentials");
+
+            var userRoles = await _userManager.GetRolesAsync(user);
+            if (!userRoles.Contains("Admin"))
+                return Unauthorized("Access denied. Admin role required.");
+
+            var result = await _signInManager.PasswordSignInAsync(user, model.Password, model.RememberMe, false);
+
+            if (result.Succeeded)
+            {
+                var token = await _jwtService.GenerateJwtToken(user);
+
+                return Ok(new AuthResponseDto
+                {
+                    Token = token,
+                    Expiration = DateTime.UtcNow.AddHours(3),
+                    UserName = user.UserName,
+                    Email = user.Email,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    Roles = userRoles.ToList()
+                });
+            }
+
+            return Unauthorized("Invalid credentials");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred during admin login");
+            return StatusCode(500, "Internal server error");
+        }
+    }
+
     [HttpPost("logout")]
     [Authorize]
     public async Task<IActionResult> Logout()

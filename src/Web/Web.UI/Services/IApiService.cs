@@ -68,7 +68,7 @@ public class ApiService : IApiService
                 queryParams.Add($"sortBy={sortBy}");
 
             var query = string.Join("&", queryParams);
-            var response = await _httpClient.GetAsync($"{_configuration["ApiSettings:ProductApi"]}/api/product?{query}");
+            var response = await _httpClient.GetAsync($"{_configuration["ApiSettings:BaseUrl"]}/api/product?{query}");
             
             if (response.IsSuccessStatusCode)
             {
@@ -108,7 +108,7 @@ public class ApiService : IApiService
     {
         try
         {
-            var response = await _httpClient.GetAsync($"{_configuration["ApiSettings:ProductApi"]}/api/product/{id}");
+            var response = await _httpClient.GetAsync($"{_configuration["ApiSettings:BaseUrl"]}/api/product/{id}");
             
             if (response.IsSuccessStatusCode)
             {
@@ -131,7 +131,7 @@ public class ApiService : IApiService
     {
         try
         {
-            var response = await _httpClient.GetAsync($"{_configuration["ApiSettings:ProductApi"]}/api/product/featured");
+            var response = await _httpClient.GetAsync($"{_configuration["ApiSettings:BaseUrl"]}/api/product/featured");
             
             if (response.IsSuccessStatusCode)
             {
@@ -154,7 +154,7 @@ public class ApiService : IApiService
     {
         try
         {
-            var response = await _httpClient.GetAsync($"{_configuration["ApiSettings:ProductApi"]}/api/product/on-sale");
+            var response = await _httpClient.GetAsync($"{_configuration["ApiSettings:BaseUrl"]}/api/product/on-sale");
             
             if (response.IsSuccessStatusCode)
             {
@@ -177,7 +177,7 @@ public class ApiService : IApiService
     {
         try
         {
-            var response = await _httpClient.GetAsync($"{_configuration["ApiSettings:ProductApi"]}/api/category");
+            var response = await _httpClient.GetAsync($"{_configuration["ApiSettings:BaseUrl"]}/api/category");
             
             if (response.IsSuccessStatusCode)
             {
@@ -200,7 +200,7 @@ public class ApiService : IApiService
     {
         try
         {
-            var response = await _httpClient.GetAsync($"{_configuration["ApiSettings:ProductApi"]}/api/category/{id}");
+            var response = await _httpClient.GetAsync($"{_configuration["ApiSettings:BaseUrl"]}/api/category/{id}");
             
             if (response.IsSuccessStatusCode)
             {
@@ -226,7 +226,7 @@ public class ApiService : IApiService
             var json = System.Text.Json.JsonSerializer.Serialize(checkout);
             var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
             
-            var response = await _httpClient.PostAsync($"{_configuration["ApiSettings:OrderApi"]}/api/order", content);
+            var response = await _httpClient.PostAsync($"{_configuration["ApiSettings:BaseUrl"]}/api/order", content);
             
             if (response.IsSuccessStatusCode)
             {
@@ -249,7 +249,7 @@ public class ApiService : IApiService
     {
         try
         {
-            var response = await _httpClient.GetAsync($"{_configuration["ApiSettings:OrderApi"]}/api/order/user/{userId}");
+            var response = await _httpClient.GetAsync($"{_configuration["ApiSettings:BaseUrl"]}/api/order/user/{userId}");
             
             if (response.IsSuccessStatusCode)
             {
@@ -272,7 +272,7 @@ public class ApiService : IApiService
     {
         try
         {
-            var response = await _httpClient.GetAsync($"{_configuration["ApiSettings:OrderApi"]}/api/order/{id}");
+            var response = await _httpClient.GetAsync($"{_configuration["ApiSettings:BaseUrl"]}/api/order/{id}");
             
             if (response.IsSuccessStatusCode)
             {
@@ -298,7 +298,7 @@ public class ApiService : IApiService
             var json = System.Text.Json.JsonSerializer.Serialize(model);
             var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
             
-            var response = await _httpClient.PostAsync($"{_configuration["ApiSettings:IdentityApi"]}/api/auth/login", content);
+            var response = await _httpClient.PostAsync($"{_configuration["ApiSettings:BaseUrl"]}/api/auth/login", content);
             
             if (response.IsSuccessStatusCode)
             {
@@ -322,7 +322,7 @@ public class ApiService : IApiService
             var json = System.Text.Json.JsonSerializer.Serialize(model);
             var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
             
-            var response = await _httpClient.PostAsync($"{_configuration["ApiSettings:IdentityApi"]}/api/auth/register", content);
+            var response = await _httpClient.PostAsync($"{_configuration["ApiSettings:BaseUrl"]}/api/auth/register", content);
             
             return response.IsSuccessStatusCode;
         }
@@ -340,7 +340,7 @@ public class ApiService : IApiService
         {
             _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
             
-            var response = await _httpClient.GetAsync($"{_configuration["ApiSettings:IdentityApi"]}/api/auth/profile");
+            var response = await _httpClient.GetAsync($"{_configuration["ApiSettings:BaseUrl"]}/api/auth/profile");
             
             if (response.IsSuccessStatusCode)
             {
@@ -368,7 +368,7 @@ public class ApiService : IApiService
             var json = System.Text.Json.JsonSerializer.Serialize(model);
             var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
             
-            var response = await _httpClient.PutAsync($"{_configuration["ApiSettings:IdentityApi"]}/api/auth/profile", content);
+            var response = await _httpClient.PutAsync($"{_configuration["ApiSettings:BaseUrl"]}/api/auth/profile", content);
             
             return response.IsSuccessStatusCode;
         }
@@ -386,7 +386,7 @@ public class ApiService : IApiService
         {
             _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
             
-            await _httpClient.PostAsync($"{_configuration["ApiSettings:IdentityApi"]}/api/auth/logout", null);
+            await _httpClient.PostAsync($"{_configuration["ApiSettings:BaseUrl"]}/api/auth/logout", null);
         }
         catch (Exception ex)
         {
@@ -402,7 +402,7 @@ public class ApiService : IApiService
             var json = System.Text.Json.JsonSerializer.Serialize(payload);
             var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
             
-            var response = await _httpClient.PostAsync($"{_configuration["ApiSettings:PaymentApi"]}/api/payment/initiate", content);
+            var response = await _httpClient.PostAsync($"{_configuration["ApiSettings:BaseUrl"]}/api/payment/initiate", content);
             
             if (response.IsSuccessStatusCode)
             {
@@ -427,7 +427,7 @@ public class ApiService : IApiService
             var json = System.Text.Json.JsonSerializer.Serialize(payload);
             var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
             
-            var response = await _httpClient.PostAsync($"{_configuration["ApiSettings:PaymentApi"]}/api/payment/verify", content);
+            var response = await _httpClient.PostAsync($"{_configuration["ApiSettings:BaseUrl"]}/api/payment/verify", content);
             
             return response.IsSuccessStatusCode;
         }
