@@ -44,7 +44,7 @@
                                 <option value="">همه دسته‌ها</option>
                                 @foreach (var category in Model.Categories)
                                 {
-                                    <option value="@category.Id" @(Model.CategoryId == category.Id ? "selected" : "")>
+                                    <option value="@category.Id" selected="@(Model.CategoryId == category.Id)">
                                         @category.NamePersian (@category.ProductCount)
                                     </option>
                                 }

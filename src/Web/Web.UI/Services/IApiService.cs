@@ -322,7 +322,7 @@ public class ApiService : IApiService
             var json = System.Text.Json.JsonSerializer.Serialize(model);
             var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
             
-            var response = await _httpClient.PostAsync($"{_configuration["ApiSettings:BaseUrl"]}/api/auth/register", content);
+            var response = await _httpClient.PostAsync($"{_configuration["ApiSettings:BaseUrl"]}api/auth/register", content);
             
             return response.IsSuccessStatusCode;
         }
@@ -340,7 +340,7 @@ public class ApiService : IApiService
         {
             _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
             
-            var response = await _httpClient.GetAsync($"{_configuration["ApiSettings:BaseUrl"]}/api/auth/profile");
+            var response = await _httpClient.GetAsync($"{_configuration["ApiSettings:BaseUrl"]}api/auth/profile");
             
             if (response.IsSuccessStatusCode)
             {
@@ -368,7 +368,7 @@ public class ApiService : IApiService
             var json = System.Text.Json.JsonSerializer.Serialize(model);
             var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
             
-            var response = await _httpClient.PutAsync($"{_configuration["ApiSettings:BaseUrl"]}/api/auth/profile", content);
+            var response = await _httpClient.PutAsync($"{_configuration["ApiSettings:BaseUrl"]}api/auth/profile", content);
             
             return response.IsSuccessStatusCode;
         }
@@ -386,7 +386,7 @@ public class ApiService : IApiService
         {
             _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
             
-            await _httpClient.PostAsync($"{_configuration["ApiSettings:BaseUrl"]}/api/auth/logout", null);
+            await _httpClient.PostAsync($"{_configuration["ApiSettings:BaseUrl"]}api/auth/logout", null);
         }
         catch (Exception ex)
         {
@@ -402,7 +402,7 @@ public class ApiService : IApiService
             var json = System.Text.Json.JsonSerializer.Serialize(payload);
             var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
             
-            var response = await _httpClient.PostAsync($"{_configuration["ApiSettings:BaseUrl"]}/api/payment/initiate", content);
+            var response = await _httpClient.PostAsync($"{_configuration["ApiSettings:BaseUrl"]}api/payment/initiate", content);
             
             if (response.IsSuccessStatusCode)
             {
@@ -427,7 +427,7 @@ public class ApiService : IApiService
             var json = System.Text.Json.JsonSerializer.Serialize(payload);
             var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
             
-            var response = await _httpClient.PostAsync($"{_configuration["ApiSettings:BaseUrl"]}/api/payment/verify", content);
+            var response = await _httpClient.PostAsync($"{_configuration["ApiSettings:BaseUrl"]}api/payment/verify", content);
             
             return response.IsSuccessStatusCode;
         }

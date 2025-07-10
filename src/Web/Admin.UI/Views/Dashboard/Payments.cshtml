@@ -48,12 +48,12 @@
                                     <label for="status">وضعیت / Status:</label>
                                     <select class="form-control" id="status" name="status">
                                         <option value="">همه</option>
-                                        <option value="1" @(Model.Status == PaymentStatus.Pending ? "selected" : "")>در انتظار</option>
-                                        <option value="2" @(Model.Status == PaymentStatus.Processing ? "selected" : "")>در حال پردازش</option>
-                                        <option value="3" @(Model.Status == PaymentStatus.Completed ? "selected" : "")>تکمیل شده</option>
-                                        <option value="4" @(Model.Status == PaymentStatus.Failed ? "selected" : "")>ناموفق</option>
-                                        <option value="5" @(Model.Status == PaymentStatus.Cancelled ? "selected" : "")>لغو شده</option>
-                                        <option value="6" @(Model.Status == PaymentStatus.Refunded ? "selected" : "")>بازگشت داده شده</option>
+                                        <option value="1" selected="@(Model.Status == PaymentStatus.Pending)">در انتظار</option>
+                                        <option value="2" selected="@(Model.Status == PaymentStatus.Processing)">در حال پردازش</option>
+                                        <option value="3" selected="@(Model.Status == PaymentStatus.Completed)">تکمیل شده</option>
+                                        <option value="4" selected="@(Model.Status == PaymentStatus.Failed)">ناموفق</option>
+                                        <option value="5" selected="@(Model.Status == PaymentStatus.Cancelled)">لغو شده</option>
+                                        <option value="6" selected="@(Model.Status == PaymentStatus.Refunded)">بازگشت داده شده</option>
                                     </select>
                                 </div>
                             </div>
@@ -62,8 +62,8 @@
                                     <label for="method">روش پرداخت / Method:</label>
                                     <select class="form-control" id="method" name="method">
                                         <option value="">همه</option>
-                                        <option value="1" @(Model.PaymentMethod == PaymentMethod.IPG ? "selected" : "")>درگاه پرداخت</option>
-                                        <option value="2" @(Model.PaymentMethod == PaymentMethod.Cash ? "selected" : "")>پرداخت نقدی</option>
+                                        <option value="1" selected="@(Model.PaymentMethod == PaymentMethod.IPG)">درگاه پرداخت</option>
+                                        <option value="2" selected="@(Model.PaymentMethod == PaymentMethod.Cash)">پرداخت نقدی</option>
                                     </select>
                                 </div>
                             </div>

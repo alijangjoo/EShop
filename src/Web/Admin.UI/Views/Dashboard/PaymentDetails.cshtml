@@ -333,11 +333,11 @@
                         <label for="Status">وضعیت جدید:</label>
                         <select class="form-control" id="Status" name="Status" required>
                             <option value="">انتخاب کنید</option>
-                            <option value="1" @(Model.Status == PaymentStatus.Pending ? "selected" : "")>در انتظار</option>
-                            <option value="2" @(Model.Status == PaymentStatus.Processing ? "selected" : "")>در حال پردازش</option>
-                            <option value="3" @(Model.Status == PaymentStatus.Completed ? "selected" : "")>تکمیل شده</option>
-                            <option value="4" @(Model.Status == PaymentStatus.Failed ? "selected" : "")>ناموفق</option>
-                            <option value="5" @(Model.Status == PaymentStatus.Cancelled ? "selected" : "")>لغو شده</option>
+                            <option value="1" selected="@(Model.Status == PaymentStatus.Pending)">در انتظار</option>
+                            <option value="2" selected="@(Model.Status == PaymentStatus.Processing)">در حال پردازش</option>
+                            <option value="3" selected="@(Model.Status == PaymentStatus.Completed)">تکمیل شده</option>
+                            <option value="4" selected="@(Model.Status == PaymentStatus.Failed)">ناموفق</option>
+                            <option value="5" selected="@(Model.Status == PaymentStatus.Cancelled)">لغو شده</option>
                         </select>
                     </div>
                     <div class="form-group">

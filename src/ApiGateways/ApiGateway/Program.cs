@@ -118,6 +118,27 @@ if (app.Environment.IsDevelopment())
 // Enable CORS
 app.UseCors("AllowAll");
 
+// Add path normalization middleware to handle double slashes
+app.Use(async (context, next) =>
+{
+    var originalPath = context.Request.Path.Value;
+    var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+    
+    logger.LogInformation("Incoming request: {Method} {Path}", context.Request.Method, originalPath);
+    
+    if (originalPath != null && originalPath.Contains("//"))
+    {
+        var normalizedPath = originalPath.Replace("//", "/");
+        context.Request.Path = normalizedPath;
+        logger.LogInformation("Normalized path from {OriginalPath} to {NormalizedPath}", originalPath, normalizedPath);
+    }
+    
+    await next();
+    
+    logger.LogInformation("Request completed: {Method} {Path} - Status: {StatusCode}", 
+        context.Request.Method, context.Request.Path, context.Response.StatusCode);
+});
+
 // Add Authentication and Authorization
 app.UseAuthentication();
 app.UseAuthorization();

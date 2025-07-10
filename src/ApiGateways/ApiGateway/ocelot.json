@@ -1,25 +1,92 @@
 {
   "Routes": [
     {
-      "DownstreamPathTemplate": "/api/auth/{everything}",
-      "DownstreamScheme": "http",
+      "DownstreamPathTemplate": "/api/Auth/register",
+      "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
-          "Host": "identity-api",
-          "Port": 80
+          "Host": "localhost",
+          "Port": 61303
+        }
+      ],
+      "UpstreamPathTemplate": "/api/auth/register",
+      "UpstreamHttpMethod": [ "POST" ],
+      "SwaggerKey": "identity",
+      "Priority": 1,
+      "RouteIsCaseSensitive": false,
+      "DangerousAcceptAnyServerCertificateValidator": true
+    },
+    {
+      "DownstreamPathTemplate": "/api/Auth/login",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 61303
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Auth/login",
+      "UpstreamHttpMethod": [ "POST" ],
+      "SwaggerKey": "identity",
+      "Priority": 1,
+      "RouteIsCaseSensitive": false,
+      "DangerousAcceptAnyServerCertificateValidator": true
+    },
+    {
+      "DownstreamPathTemplate": "/api/Auth/logout",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 61303
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Auth/logout",
+      "UpstreamHttpMethod": [ "POST" ],
+      "SwaggerKey": "identity",
+      "Priority": 1,
+      "RouteIsCaseSensitive": false,
+      "DangerousAcceptAnyServerCertificateValidator": true
+    },
+    {
+      "DownstreamPathTemplate": "/api/auth/profile",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 61303
+        }
+      ],
+      "UpstreamPathTemplate": "/api/auth/profile",
+      "UpstreamHttpMethod": [ "GET", "PUT" ],
+      "SwaggerKey": "identity",
+      "Priority": 1,
+      "RouteIsCaseSensitive": false,
+      "DangerousAcceptAnyServerCertificateValidator": true
+    },
+    {
+      "DownstreamPathTemplate": "/api/auth/{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 61303
         }
       ],
       "UpstreamPathTemplate": "/api/auth/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
-      "SwaggerKey": "identity"
+      "SwaggerKey": "identity",
+      "Priority": 2,
+      "RouteIsCaseSensitive": false,
+      "DangerousAcceptAnyServerCertificateValidator": true
     },
     {
       "DownstreamPathTemplate": "/api/user/{everything}",
-      "DownstreamScheme": "http",
+      "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
-          "Host": "identity-api",
-          "Port": 80
+          "Host": "localhost",
+          "Port": 61303
         }
       ],
       "UpstreamPathTemplate": "/api/user/{everything}",
@@ -126,7 +193,7 @@
       "SwaggerKey": "notification"
     }
   ],
-  
+
   "SwaggerEndPoints": [
     {
       "Key": "identity",
@@ -134,7 +201,7 @@
         {
           "Name": "Identity API",
           "Version": "v1",
-          "Url": "http://identity-api:80/swagger/v1/swagger.json"
+          "Url": "http://localhost:80/swagger/v1/swagger.json"
         }
       ]
     },
@@ -179,7 +246,7 @@
       ]
     }
   ],
-  
+
   "GlobalConfiguration": {
     "BaseUrl": "http://localhost:5000",
     "RequestIdKey": "X-Request-ID",
@@ -196,6 +263,12 @@
     },
     "LoadBalancerOptions": {
       "Type": "RoundRobin"
+    },
+    "DownstreamScheme": "http",
+    "ServiceDiscoveryProvider": {
+      "Host": "localhost",
+      "Port": 8500,
+      "Type": "Consul"
     }
   }
 }
