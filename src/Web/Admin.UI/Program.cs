@@ -62,6 +62,18 @@ app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Handle unauthorized access
+app.Use(async (context, next) =>
+{
+    await next();
+    
+    if (context.Response.StatusCode == 401)
+    {
+        var returnUrl = context.Request.Path + context.Request.QueryString;
+        context.Response.Redirect($"/Auth/Login?returnUrl={Uri.EscapeDataString(returnUrl)}");
+    }
+});
+
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Dashboard}/{action=Index}/{id?}");
