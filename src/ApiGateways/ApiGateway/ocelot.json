@@ -1,7 +1,7 @@
 {
   "Routes": [
     {
-      "DownstreamPathTemplate": "/api/Auth/register",
+      "DownstreamPathTemplate": "/api/auth/register",
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
@@ -12,12 +12,12 @@
       "UpstreamPathTemplate": "/api/auth/register",
       "UpstreamHttpMethod": [ "POST" ],
       "SwaggerKey": "identity",
-      "Priority": 1,
+      "Priority": 0,
       "RouteIsCaseSensitive": false,
       "DangerousAcceptAnyServerCertificateValidator": true
     },
     {
-      "DownstreamPathTemplate": "/api/Auth/login",
+      "DownstreamPathTemplate": "/api/auth/login",
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
@@ -25,42 +25,10 @@
           "Port": 61303
         }
       ],
-      "UpstreamPathTemplate": "/api/Auth/login",
+      "UpstreamPathTemplate": "/api/auth/login",
       "UpstreamHttpMethod": [ "POST" ],
       "SwaggerKey": "identity",
-      "Priority": 1,
-      "RouteIsCaseSensitive": false,
-      "DangerousAcceptAnyServerCertificateValidator": true
-    },
-    {
-      "DownstreamPathTemplate": "/api/Auth/logout",
-      "DownstreamScheme": "https",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 61303
-        }
-      ],
-      "UpstreamPathTemplate": "/api/Auth/logout",
-      "UpstreamHttpMethod": [ "POST" ],
-      "SwaggerKey": "identity",
-      "Priority": 1,
-      "RouteIsCaseSensitive": false,
-      "DangerousAcceptAnyServerCertificateValidator": true
-    },
-    {
-      "DownstreamPathTemplate": "/api/auth/profile",
-      "DownstreamScheme": "https",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 61303
-        }
-      ],
-      "UpstreamPathTemplate": "/api/auth/profile",
-      "UpstreamHttpMethod": [ "GET", "PUT" ],
-      "SwaggerKey": "identity",
-      "Priority": 1,
+      "Priority": 0,
       "RouteIsCaseSensitive": false,
       "DangerousAcceptAnyServerCertificateValidator": true
     },
@@ -76,17 +44,17 @@
       "UpstreamPathTemplate": "/api/auth/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
       "SwaggerKey": "identity",
-      "Priority": 2,
+      "Priority": 1,
       "RouteIsCaseSensitive": false,
       "DangerousAcceptAnyServerCertificateValidator": true
     },
     {
       "DownstreamPathTemplate": "/api/user/{everything}",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
           "Host": "localhost",
-          "Port": 61303
+          "Port": 5001
         }
       ],
       "UpstreamPathTemplate": "/api/user/{everything}",
@@ -98,11 +66,11 @@
     },
     {
       "DownstreamPathTemplate": "/api/product/{everything}",
-      "DownstreamScheme": "http",
+      "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
-          "Host": "product-api",
-          "Port": 80
+          "Host": "localhost",
+          "Port": 7003
         }
       ],
       "UpstreamPathTemplate": "/api/product/{everything}",
@@ -117,8 +85,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "product-api",
-          "Port": 80
+          "Host": "localhost",
+          "Port": 5002
         }
       ],
       "UpstreamPathTemplate": "/api/category/{everything}",
@@ -133,8 +101,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "order-api",
-          "Port": 80
+          "Host": "localhost",
+          "Port": 5003
         }
       ],
       "UpstreamPathTemplate": "/api/order/{everything}",
@@ -149,8 +117,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "order-api",
-          "Port": 80
+          "Host": "localhost",
+          "Port": 5003
         }
       ],
       "UpstreamPathTemplate": "/api/cart/{everything}",
@@ -165,8 +133,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "payment-api",
-          "Port": 80
+          "Host": "localhost",
+          "Port": 5004
         }
       ],
       "UpstreamPathTemplate": "/api/payment/{everything}",
@@ -181,8 +149,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "notification-api",
-          "Port": 80
+          "Host": "localhost",
+          "Port": 5005
         }
       ],
       "UpstreamPathTemplate": "/api/notification/{everything}",
@@ -201,7 +169,7 @@
         {
           "Name": "Identity API",
           "Version": "v1",
-          "Url": "http://localhost:80/swagger/v1/swagger.json"
+          "Url": "http://localhost:5001/swagger/v1/swagger.json"
         }
       ]
     },
@@ -211,7 +179,7 @@
         {
           "Name": "Product API",
           "Version": "v1",
-          "Url": "http://product-api:80/swagger/v1/swagger.json"
+          "Url": "http://localhost:5002/swagger/v1/swagger.json"
         }
       ]
     },
@@ -221,7 +189,7 @@
         {
           "Name": "Order API",
           "Version": "v1",
-          "Url": "http://order-api:80/swagger/v1/swagger.json"
+          "Url": "http://localhost:5003/swagger/v1/swagger.json"
         }
       ]
     },
@@ -231,7 +199,7 @@
         {
           "Name": "Payment API",
           "Version": "v1",
-          "Url": "http://payment-api:80/swagger/v1/swagger.json"
+          "Url": "http://localhost:5004/swagger/v1/swagger.json"
         }
       ]
     },
@@ -241,7 +209,7 @@
         {
           "Name": "Notification API",
           "Version": "v1",
-          "Url": "http://notification-api:80/swagger/v1/swagger.json"
+          "Url": "http://localhost:5005/swagger/v1/swagger.json"
         }
       ]
     }

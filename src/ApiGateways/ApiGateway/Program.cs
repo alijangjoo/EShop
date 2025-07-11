@@ -3,15 +3,24 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
+using Ocelot.Provider.Consul;
+using Ocelot.Provider.Polly;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Explicitly load Ocelot configuration files (base + environment specific)
+builder.Configuration
+    .AddJsonFile("ocelot.json", optional: false, reloadOnChange: true)
+    .AddJsonFile($"ocelot.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true);
+
 // Add services to the container
 builder.Services.AddControllers();
 
-// Add Ocelot
-builder.Services.AddOcelot();
+// Replace the existing AddOcelot() registration so it uses the updated configuration
+builder.Services.AddOcelot(builder.Configuration)
+                .AddPolly()
+                .AddConsul();
 
 // Add JWT Authentication
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
@@ -133,15 +142,19 @@ app.Use(async (context, next) =>
         logger.LogInformation("Normalized path from {OriginalPath} to {NormalizedPath}", originalPath, normalizedPath);
     }
     
+    // Log the final path that will be processed by Ocelot
+    logger.LogInformation("Final path for Ocelot: {Method} {Path}", context.Request.Method, context.Request.Path);
+    
     await next();
     
     logger.LogInformation("Request completed: {Method} {Path} - Status: {StatusCode}", 
         context.Request.Method, context.Request.Path, context.Response.StatusCode);
 });
 
-// Add Authentication and Authorization
+// Add Authentication middleware; we deliberately omit global Authorization middleware so that
+// Ocelot handles route-level authorization based on its configuration. This prevents
+// unauthenticated errors for public endpoints like /api/auth/register.
 app.UseAuthentication();
-app.UseAuthorization();
 
 // Add Health Check endpoint
 app.MapHealthChecks("/health");

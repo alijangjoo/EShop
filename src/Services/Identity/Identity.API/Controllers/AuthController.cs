@@ -46,11 +46,11 @@ public class AuthController : ControllerBase
                 FirstName = model.FirstName,
                 LastName = model.LastName,
                 PhoneNumber = model.PhoneNumber,
-                Address = model.Address,
-                City = model.City,
-                State = model.State,
-                Country = model.Country,
-                ZipCode = model.ZipCode
+                Address = "",
+                City = "",
+                State = "",
+                Country = "",
+                ZipCode = ""
             };
 
             var result = await _userManager.CreateAsync(user, model.Password);

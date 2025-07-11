@@ -1,7 +1,7 @@
 {
   "Routes": [
     {
-      "DownstreamPathTemplate": "/api/Auth/register",
+      "DownstreamPathTemplate": "/api/auth/register",
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
@@ -17,7 +17,7 @@
       "DangerousAcceptAnyServerCertificateValidator": true
     },
     {
-      "DownstreamPathTemplate": "/api/Auth/login",
+      "DownstreamPathTemplate": "/api/auth/login",
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
@@ -25,7 +25,7 @@
           "Port": 61303
         }
       ],
-      "UpstreamPathTemplate": "/api/Auth/login",
+      "UpstreamPathTemplate": "/api/auth/login",
       "UpstreamHttpMethod": [ "POST" ],
       "SwaggerKey": "identity",
       "Priority": 1,
@@ -33,7 +33,7 @@
       "DangerousAcceptAnyServerCertificateValidator": true
     },
     {
-      "DownstreamPathTemplate": "/api/Auth/logout",
+      "DownstreamPathTemplate": "/api/auth/logout",
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
@@ -41,7 +41,7 @@
           "Port": 61303
         }
       ],
-      "UpstreamPathTemplate": "/api/Auth/logout",
+      "UpstreamPathTemplate": "/api/auth/logout",
       "UpstreamHttpMethod": [ "POST" ],
       "SwaggerKey": "identity",
       "Priority": 1,
@@ -101,8 +101,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "product-api",
-          "Port": 80
+          "Host": "localhost",
+          "Port": 5002
         }
       ],
       "UpstreamPathTemplate": "/api/product/{everything}",
@@ -117,8 +117,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "product-api",
-          "Port": 80
+          "Host": "localhost",
+          "Port": 5002
         }
       ],
       "UpstreamPathTemplate": "/api/category/{everything}",
@@ -133,8 +133,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "order-api",
-          "Port": 80
+          "Host": "localhost",
+          "Port": 5003
         }
       ],
       "UpstreamPathTemplate": "/api/order/{everything}",
@@ -149,8 +149,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "order-api",
-          "Port": 80
+          "Host": "localhost",
+          "Port": 5003
         }
       ],
       "UpstreamPathTemplate": "/api/cart/{everything}",
@@ -165,8 +165,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "payment-api",
-          "Port": 80
+          "Host": "localhost",
+          "Port": 5004
         }
       ],
       "UpstreamPathTemplate": "/api/payment/{everything}",
@@ -181,8 +181,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "notification-api",
-          "Port": 80
+          "Host": "localhost",
+          "Port": 5005
         }
       ],
       "UpstreamPathTemplate": "/api/notification/{everything}",
@@ -201,7 +201,7 @@
         {
           "Name": "Identity API",
           "Version": "v1",
-          "Url": "http://localhost:80/swagger/v1/swagger.json"
+          "Url": "https://localhost:61303/swagger/v1/swagger.json"
         }
       ]
     },
@@ -211,7 +211,7 @@
         {
           "Name": "Product API",
           "Version": "v1",
-          "Url": "http://product-api:80/swagger/v1/swagger.json"
+          "Url": "http://localhost:5002/swagger/v1/swagger.json"
         }
       ]
     },
@@ -221,7 +221,7 @@
         {
           "Name": "Order API",
           "Version": "v1",
-          "Url": "http://order-api:80/swagger/v1/swagger.json"
+          "Url": "http://localhost:5003/swagger/v1/swagger.json"
         }
       ]
     },
@@ -231,7 +231,7 @@
         {
           "Name": "Payment API",
           "Version": "v1",
-          "Url": "http://payment-api:80/swagger/v1/swagger.json"
+          "Url": "http://localhost:5004/swagger/v1/swagger.json"
         }
       ]
     },
@@ -241,7 +241,7 @@
         {
           "Name": "Notification API",
           "Version": "v1",
-          "Url": "http://notification-api:80/swagger/v1/swagger.json"
+          "Url": "http://localhost:5005/swagger/v1/swagger.json"
         }
       ]
     }
